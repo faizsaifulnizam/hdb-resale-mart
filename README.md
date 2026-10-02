@@ -2,15 +2,15 @@
 
 # hdb-resale-mart
 
-> **Answer:** 4-room resale price per m² **slipped 1.3%** in Q3 2026 vs a year earlier — national median S$6,647 → **S$6,559/m²** — and the move decomposes almost entirely into **within-town pricing** (rate −53.3 S$/m²) rather than a change in which towns sold (mix −0.7, ≈ 0). A slight dip; a rate story; one quarter.
+> **Answer:** 4-room resale price per m² dipped in Q3 2026 vs a year earlier: **−1.3%** on the headline median (S$6,647 → **S$6,559/m²**) and **−0.6%** on the mean basis used for the decomposition — both point the same way (the split needs means because medians are not additive). The move is **within-town, not mix**: rate −53.3 S$/m² vs mix −0.7, interaction +13.3 reported separately. A small dip; a rate story; one quarter.
 
 **Status:** built 2026-10-02. Part of a six-repo series on Singapore's public data.
 
 ## Key numbers (all reproducible)
 
-- **Headline:** national 4-room median price/m² 6,647 → 6,559 (−1.32%), Q3 2026 vs Q3 2025.
+- **Headline:** national 4-room median price/m² 6,647 → 6,559 (**−1.32%**, medians) · **−0.57%** on the mean basis that the split uses; Q3 2026 vs Q3 2025.
 - **16 of 23** shown towns lower; range **Queenstown +10.9% → Bukit Batok −6.3%** (towns need ≥25 sales in each compared quarter to appear in headline charts; all 26 are in the CSV).
-- **Shift-share** (transaction-weighted, means): total −40.6 S$/m² = rate **−53.3** + mix **−0.7** + interaction **+13.3**.
+- **Shift-share** (transaction-weighted, means): total −40.6 S$/m² = rate **−53.3** + mix **−0.7** + interaction **+13.3** (the overlap term — town-weight shifts coinciding with town-price moves; reported, not folded in).
 - **Robust across windows** (totals −0.6% … +1.0%): [`docs/sensitivity.md`](docs/sensitivity.md).
 
 ![4-room median price/m² by town — Q3 2026 vs Q3 2025](reports/figures/f1_town_dumbbell.png)

@@ -12,6 +12,6 @@ Screenshot: [`reports/figures/bi_page.png`](../reports/figures/bi_page.png) — 
 
 **Notes**
 
-- The `.pbix` is a binary and is not committed; keep it locally and refresh via Home → Refresh after re-running `python src/analysis.py`.
+- The `.pbix` is a binary and is not committed — it rides in the [v1.0 release](https://github.com/faizsaifulnizam/hdb-resale-mart/releases/tag/v1.0) (open it to re-screenshot or refresh via Home → Refresh after re-running `python src/analysis.py`).
 - This page shows all 26 towns — the ≥25-transactions display threshold applies to the matplotlib figures only.
 - Medians are the display metric; the shift-share decomposition uses means (medians are not additive — see the decision memo).

@@ -1,7 +1,7 @@
 # Decision memo — 4-room resale prices, Q3 2026 vs Q3 2025
 
 **Data:** HDB resale registrations (data.gov.sg, pulled 2026-10-02) · 4-room flats · window 2023-01 → 2026-09.
-**Headline:** the national median price per m² dipped **−1.3% year-on-year** (S$6,647 → S$6,559, Q3 2026 vs Q3 2025) — and the decomposition says the move is **within-town pricing**, not a change in which towns sold.
+**Headline:** the national median price per m² dipped **−1.3% year-on-year** (S$6,647 → S$6,559, Q3 2026 vs Q3 2025); the decomposition runs on **means** (**−0.6%**) — medians are not additive, and both bases point the same way. The move is **within-town**, not a change in which towns sold.
 
 ## What moved
 
@@ -16,7 +16,7 @@ Transaction-weighted shift-share on quarterly means:
 |---|---|---|
 | rate (within-town) | **−53.3** | dominates the move |
 | mix (town weights) | **−0.7** | nets to ≈ zero |
-| interaction | +13.3 | reported, not hidden |
+| interaction | +13.3 | the overlap term (weight shifts × price moves); reported, not folded in |
 | **total** | **−40.6** | mean level 7,168.5 → 7,127.9 |
 
 Mix nets to ≈ zero *because share gains and losses cancel each other*: Bukit Batok gained volume (134 → 189 sales) while its own median eased 6.3%; Queenstown gained volume *and* rose 10.9%. Across towns these effects offset almost exactly. So the per-m² move is a **rate story** at this horizon.
