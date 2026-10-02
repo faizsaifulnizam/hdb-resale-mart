@@ -1,8 +1,42 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="320" viewBox="0 0 1280 320" role="img" aria-label="hdb-resale-mart — a six-repo series on Singapore's public data">
+<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="320" viewBox="0 0 1280 320" role="img" aria-label="hdb-resale-mart — 4-room resale price per m2 by town, Q3 2025 to Q3 2026: a six-repo series on Singapore's public data">
   <rect width="1280" height="320" fill="#FBFBF9"/>
-  <text x="72" y="126" font-family="Georgia, 'Source Serif 4', serif" font-size="62" fill="#14293D">hdb-resale-mart</text>
-  <rect x="72" y="158" width="420" height="4" fill="#22607B"/>
-  <text x="72" y="212" font-family="Inter, 'Helvetica Neue', Arial, sans-serif" font-size="23" fill="#5C6B79">After 2023, did 4-room HDB resale prices rise because flats became more expensive</text>
-  <text x="72" y="244" font-family="Inter, 'Helvetica Neue', Arial, sans-serif" font-size="23" fill="#5C6B79">per square metre — or because the mix of towns and flat sizes sold changed?</text>
-  <text x="1208" y="286" text-anchor="end" font-family="Inter, 'Helvetica Neue', Arial, sans-serif" font-size="17" fill="#22607B">A six-repo series on Singapore's public data · 1 of 6</text>
+  <title>hdb-resale-mart — a six-repo series on Singapore's public data</title>
+  <text x="72" y="118" font-family="Georgia, 'Source Serif 4', serif" font-size="58" fill="#14293D">hdb-resale-mart</text>
+  <rect x="72" y="146" width="420" height="4" fill="#22607B"/>
+  <text x="72" y="196" font-family="Inter, 'Helvetica Neue', Arial, sans-serif" font-size="20" fill="#5C6B79">After 2023, did 4-room resale prices rise because</text>
+  <text x="72" y="222" font-family="Inter, 'Helvetica Neue', Arial, sans-serif" font-size="20" fill="#5C6B79">flats got more expensive per square metre — or</text>
+  <text x="72" y="248" font-family="Inter, 'Helvetica Neue', Arial, sans-serif" font-size="20" fill="#5C6B79">because the mix of towns and flat sizes sold</text>
+  <text x="72" y="274" font-family="Inter, 'Helvetica Neue', Arial, sans-serif" font-size="20" fill="#5C6B79">changed?</text>
+  <text x="72" y="306" font-family="Inter, 'Helvetica Neue', Arial, sans-serif" font-size="16" fill="#8B98A5">Median price per m² · 2025 <tspan fill="#8B98A5">●</tspan> → 2026: <tspan fill="#22607B">●</tspan> down <tspan fill="#C0552B">●</tspan> up · 6 of 23 shown towns</text>
+  <line x1="830.9" y1="72" x2="804.2" y2="72" stroke="#E7E3DC" stroke-width="3"/>
+  <circle cx="830.9" cy="72" r="6" fill="#8B98A5"/>
+  <circle cx="804.2" cy="72" r="8" fill="#22607B"/>
+  <text x="736" y="77" text-anchor="end" font-family="Inter, Helvetica, Arial, sans-serif" font-size="18" fill="#5C6B79">Bukit Batok</text>
+  <text x="1164" y="77" font-family="Inter, Helvetica, Arial, sans-serif" font-size="18" fill="#22607B">-6.3%</text>
+  <line x1="862.6" y1="106" x2="846.4" y2="106" stroke="#E7E3DC" stroke-width="3"/>
+  <circle cx="862.6" cy="106" r="6" fill="#8B98A5"/>
+  <circle cx="846.4" cy="106" r="8" fill="#22607B"/>
+  <text x="736" y="111" text-anchor="end" font-family="Inter, Helvetica, Arial, sans-serif" font-size="18" fill="#5C6B79">Serangoon</text>
+  <text x="1164" y="111" font-family="Inter, Helvetica, Arial, sans-serif" font-size="18" fill="#22607B">-3.6%</text>
+  <line x1="767.6" y1="140" x2="760.1" y2="140" stroke="#E7E3DC" stroke-width="3"/>
+  <circle cx="767.6" cy="140" r="6" fill="#8B98A5"/>
+  <circle cx="760.1" cy="140" r="8" fill="#22607B"/>
+  <text x="736" y="145" text-anchor="end" font-family="Inter, Helvetica, Arial, sans-serif" font-size="18" fill="#5C6B79">Jurong East</text>
+  <text x="1164" y="145" font-family="Inter, Helvetica, Arial, sans-serif" font-size="18" fill="#22607B">-2.1%</text>
+  <line x1="820.2" y1="174" x2="816.8" y2="174" stroke="#E7E3DC" stroke-width="3"/>
+  <circle cx="820.2" cy="174" r="6" fill="#8B98A5"/>
+  <circle cx="816.8" cy="174" r="8" fill="#22607B"/>
+  <text x="736" y="179" text-anchor="end" font-family="Inter, Helvetica, Arial, sans-serif" font-size="18" fill="#5C6B79">Sembawang</text>
+  <text x="1164" y="179" font-family="Inter, Helvetica, Arial, sans-serif" font-size="18" fill="#22607B">-0.8%</text>
+  <line x1="816.8" y1="208" x2="826.9" y2="208" stroke="#E7E3DC" stroke-width="3"/>
+  <circle cx="816.8" cy="208" r="6" fill="#8B98A5"/>
+  <circle cx="826.9" cy="208" r="8" fill="#C0552B"/>
+  <text x="736" y="213" text-anchor="end" font-family="Inter, Helvetica, Arial, sans-serif" font-size="18" fill="#5C6B79">Tampines</text>
+  <text x="1164" y="213" font-family="Inter, Helvetica, Arial, sans-serif" font-size="18" fill="#C0552B">+2.5%</text>
+  <line x1="1077.0" y1="242" x2="1150.0" y2="242" stroke="#E7E3DC" stroke-width="3"/>
+  <circle cx="1077.0" cy="242" r="6" fill="#8B98A5"/>
+  <circle cx="1150.0" cy="242" r="8" fill="#C0552B"/>
+  <text x="736" y="247" text-anchor="end" font-family="Inter, Helvetica, Arial, sans-serif" font-size="18" fill="#5C6B79">Queenstown</text>
+  <text x="1164" y="247" font-family="Inter, Helvetica, Arial, sans-serif" font-size="18" fill="#C0552B">+10.9%</text>
+  <text x="1208" y="286" text-anchor="end" font-family="Inter, 'Helvetica Neue', Arial, sans-serif" font-size="18" fill="#22607B">A six-repo series on Singapore's public data · 1 of 6</text>
 </svg>

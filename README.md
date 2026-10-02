@@ -2,6 +2,8 @@
 
 # hdb-resale-mart
 
+[![license: MIT](https://img.shields.io/badge/license-MIT-22607B.svg)](LICENSE) ![Python 3.12](https://img.shields.io/badge/Python-3.12-2E7D6B.svg) ![DuckDB](https://img.shields.io/badge/analytics-DuckDB-C0552B.svg) [![data: data.gov.sg](https://img.shields.io/badge/data-data.gov.sg-14293D.svg)](https://data.gov.sg/datasets/d_8b84c4ee58e3cfc0ece0d773c8ca6abc/view) [![Power BI page](https://img.shields.io/badge/Power%20BI-page%20included-8A6EAF.svg)](bi/README.md)
+
 > **Answer:** 4-room resale price per m² dipped in Q3 2026 vs a year earlier: **−1.3%** on the headline median (S$6,647 → **S$6,559/m²**) and **−0.6%** on the mean basis used for the decomposition — both point the same way (the split needs means because medians are not additive). The move is **within-town, not mix**: rate −53.3 S$/m² vs mix −0.7, interaction +13.3 reported separately. A small dip; a rate story; one quarter.
 
 **Status:** built 2026-10-02. Part of a six-repo series on Singapore's public data.
@@ -15,7 +17,14 @@
 
 ![4-room median price/m² by town — Q3 2026 vs Q3 2025](reports/figures/f1_town_dumbbell.png)
 
-*Also in `reports/figures/`: rolling medians (`f2`), town-mix drift (`f3`), the rate/mix waterfall (`f4`) — plus the Power BI page [`reports/figures/bi_page.png`](reports/figures/bi_page.png) and the half-page [`docs/decision_memo.md`](docs/decision_memo.md).*
+### More views
+
+| | |
+|---|---|
+| [![3-month rolling medians of town price/m²](reports/figures/f2_rolling_median.png)](reports/figures/f2_rolling_median.png) | [![Town-mix drift over the sample](reports/figures/f3_mix_drift.png)](reports/figures/f3_mix_drift.png) |
+| [![Rate/mix waterfall of the national move](reports/figures/f4_waterfall.png)](reports/figures/f4_waterfall.png) | [![The Power BI page for this dataset](reports/figures/bi_page.png)](reports/figures/bi_page.png) |
+
+*Rolling medians (`f2`), town-mix drift (`f3`), the rate/mix waterfall (`f4`), and the Power BI page (`bi_page`) — full size in [`reports/figures/`](reports/figures/) · half-page write-up in [`docs/decision_memo.md`](docs/decision_memo.md).*
 
 ## The question
 
