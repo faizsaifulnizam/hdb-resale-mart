@@ -55,7 +55,7 @@ def main():
     data = get(url)
     OUT.parent.mkdir(parents=True, exist_ok=True)
     OUT.write_bytes(data)
-    print(f"downloaded {len(data)} bytes, ~{data.count(chr(10))} lines")
+    print(f"downloaded {len(data)} bytes, ~{data.count(10)} lines")
     print("path:", OUT)
 
 
