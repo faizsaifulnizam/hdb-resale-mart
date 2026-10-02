@@ -1,4 +1,4 @@
-# Six-on-SG series matplotlib style — v0.1.2 (hex colors double-quoted; legend defaults to lower right)
+# Six-on-SG series matplotlib style — v0.1.3 (hex colors double-quoted; legend auto-placed — 'best')
 font.family: sans-serif
 font.sans-serif: Inter, DejaVu Sans, sans-serif
 font.size: 10
@@ -27,5 +27,5 @@ savefig.facecolor: "#FBFBF9"
 savefig.dpi: 200
 figure.figsize: 8, 4.5
 legend.frameon: False
-legend.loc: lower right
+legend.loc: best
 legend.fontsize: 9
