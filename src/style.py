@@ -14,13 +14,13 @@ from matplotlib import font_manager
 ASSETS = Path(__file__).resolve().parent.parent / "assets"
 
 
-def use_series_style():
-    """Apply the Six-on-SG style. Safe to call more than once."""
+def use_series_style(dark: bool = False):
+    """Apply the Six-on-SG style — light by default, `dark=True` for the dark twin. Safe to call more than once."""
     for ttf in ("Inter-Regular.ttf", "Inter-SemiBold.ttf"):
         f = ASSETS / "fonts" / ttf
         if f.exists():
             font_manager.fontManager.addfont(str(f))
-    plt.style.use(str(ASSETS / "style.mplstyle"))
+    plt.style.use(str(ASSETS / ("style-dark.mplstyle" if dark else "style.mplstyle")))
 
 
 if __name__ == "__main__":

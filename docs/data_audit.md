@@ -13,10 +13,10 @@ Read-only profile of `data/raw/hdb-resale-prices-2017-onwards.csv` — 241,823 l
 - **Ranges:** price 140,000 → 1,728,000 · area 31.0 → 366.7 m² · price/m² p0.1–p99.9: 2,785 → 13,698 (median 5,325). Tails are real (small flats carry high S$/m²); no impossible values.
 - **Structural:** price ≤ 0: 0 · area ≤ 0: 0 · unparseable month: 0.
 
-## Proposed rules — Faiz calls #2 / #3 *(proposed 2026-10-02 — confirm at next checkpoint)*
+## Rules in force *(set 2026-10-02 from this profile — applied throughout the build)*
 
-1. **Window (#2):** long view **2023-01 → 2026-09**; headline = latest complete quarter **(2026 Q3, Jul–Sep) vs same quarter a year earlier (2025 Q3)**, 4-room flats.
-2. **Tiny-town display threshold (#3):** a town appears in headline charts only with **≥ 25 four-room transactions in each compared quarter**; below that it stays in `outputs/town_4room_yoy.csv` with a flag. Effect: drops **BUKIT TIMAH (5/4), MARINE PARADE (7/7), CENTRAL AREA (23/23)**; all others ≥ 38. (Central Area sits just under the line — noted, can revisit.)
+1. **Window:** long view **2023-01 → 2026-09**; headline = latest complete quarter **(2026 Q3, Jul–Sep) vs same quarter a year earlier (2025 Q3)**, 4-room flats.
+2. **Tiny-town display threshold:** a town appears in headline charts only with **≥ 25 four-room transactions in each compared quarter**; below that it still appears in `outputs/town_4room_yoy.csv` — the threshold is a display rule, not a filter. Effect: drops **BUKIT TIMAH (5/4), MARINE PARADE (7/7), CENTRAL AREA (23/23)**; all others ≥ 38. (Central Area sits just under the line — noted, can revisit.)
 3. **Outlier rule:** **none applied** — data is structurally clean; winsorising would hide real small-flat high-S$/m² cases. Documented instead.
 
 ## Exclusion ledger (staging)

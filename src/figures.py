@@ -1,10 +1,10 @@
-"""S3 figures — code-generated, series style. Run: python src/figures.py (from the repo root).
+"""S3 figures — code-generated, series style, light + dark (theme-adaptive). Run: python src/figures.py (from the repo root).
 
-Produces (reports/figures/):
-  f1_town_dumbbell.png  — 4-room median price/m² by town, Q3 2026 vs Q3 2025 (threshold applied)
-  f2_rolling_median.png — rolling 3-month median, Singapore + Tampines + Sengkang (2023–2026)
-  f3_mix_drift.png      — share of quarterly 4-room registrations, top 6 towns + other
-  f4_waterfall.png      — shift-share bridge: rate / mix / interaction / total
+Produces (reports/figures/), each as a light/dark pair for `<picture>` theme-adaptive README embeds:
+  f1_town_dumbbell[-dark].png  — 4-room median price/m² by town, Q3 2026 vs Q3 2025 (threshold applied)
+  f2_rolling_median[-dark].png — rolling 3-month median, Singapore + Tampines + Sengkang (2023–2026)
+  f3_mix_drift[-dark].png      — share of quarterly 4-room registrations, top 6 towns + other
+  f4_waterfall[-dark].png      — shift-share bridge: rate / mix / interaction / total
 Reads the parquet via DuckDB; re-runs sql/03 + sql/04 so figures always match the SQL.
 """
 import sys
@@ -33,14 +33,21 @@ PARQUET = (ROOT / "data/processed/sales.parquet").as_posix()
 FIGDIR = ROOT / "reports/figures"
 FT = "4 ROOM"
 
-INK = "#14293D"
-PETROL = "#22607B"
-BURNT = "#C0552B"
-TEAL = "#2E7D6B"
-VIOLET = "#8A6EAF"
-BRASS = "#B9975B"
-MUTED = "#5C6B79"
-LIGHT = "#C9C6BF"
+# Palette pairs — the dark set adapts the series hues for the ink surface (same roles, same semantics).
+LIGHT = dict(ink="#14293D", petrol="#22607B", burnt="#C0552B", teal="#2E7D6B",
+             violet="#8A6EAF", brass="#B9975B", muted="#5C6B79", light="#C9C6BF",
+             edge="white", suffix="")
+DARK = dict(ink="#E7E3DC", petrol="#4C93B5", burnt="#D97E4F", teal="#45A08B",
+            violet="#A78FC8", brass="#D4B87A", muted="#8B98A5", light="#435D73",
+            edge="#14293D", suffix="-dark")
+T = LIGHT  # active palette; switched by main() per pass
+
+
+def use_palette(p):
+    """Switch the active figure palette (module-level)."""
+    global T
+    T = p
+
 
 SRC = "Source: HDB resale registrations via data.gov.sg (© HDB), pulled 2026-10-02"
 
@@ -51,11 +58,11 @@ def q(con, sql):
 
 def foot(fig, text):
     fig.tight_layout(rect=(0, 0.075, 1, 1))
-    fig.text(0.01, 0.015, text, fontsize=7.5, color=MUTED)
+    fig.text(0.01, 0.015, text, fontsize=7.5, color=T["muted"])
 
 
 def save(fig, name):
-    p = FIGDIR / name
+    p = FIGDIR / name.replace(".png", T["suffix"] + ".png")
     fig.savefig(p)
     plt.close(fig)
     print(f"wrote {p.as_posix()}  ({p.stat().st_size} bytes)")
@@ -74,12 +81,12 @@ def fig1_dumbbell(con):
     margin = (hi - lo) * 0.03
     for y, (town, n0, n1, m0, m1) in zip(ys, rows):
         up = m1 >= m0
-        ax.plot([m0, m1], [y, y], color=LIGHT, lw=1.3, zorder=1)
-        ax.scatter([m0], [y], s=26, color=MUTED, zorder=2, edgecolors="white", linewidths=0.8)
-        ax.scatter([m1], [y], s=36, color=(TEAL if up else BURNT), zorder=3, edgecolors="white", linewidths=0.8)
+        ax.plot([m0, m1], [y, y], color=T["light"], lw=1.3, zorder=1)
+        ax.scatter([m0], [y], s=26, color=T["muted"], zorder=2, edgecolors=T["edge"], linewidths=0.8)
+        ax.scatter([m1], [y], s=36, color=(T["teal"] if up else T["burnt"]), zorder=3, edgecolors=T["edge"], linewidths=0.8)
         pct = 100 * (m1 / m0 - 1)
         pct_txt = "(0.0%)" if abs(pct) < 0.05 else f"({pct:+.1f}%)"
-        ax.text(max(m0, m1) + margin, y, f"{m1:,.0f} {pct_txt}", va="center", fontsize=8, color=INK)
+        ax.text(max(m0, m1) + margin, y, f"{m1:,.0f} {pct_txt}", va="center", fontsize=8, color=T["ink"])
     ax.set_yticks(list(ys))
     ax.set_yticklabels(towns)
     ax.set_ylim(-0.8, len(rows) - 0.2)
@@ -89,9 +96,9 @@ def fig1_dumbbell(con):
     ax.yaxis.grid(False)
     ax.set_xlabel("median price S$/m²")
     ax.set_title(f"4-room resale price per m² — Q3 2026 vs Q3 2025: lower in {n_down} of {len(rows)} towns")
-    ax.scatter([], [], s=26, color=MUTED, label="Q3 2025")
-    ax.scatter([], [], s=36, color=TEAL, label="Q3 2026 — higher")
-    ax.scatter([], [], s=36, color=BURNT, label="Q3 2026 — lower")
+    ax.scatter([], [], s=26, color=T["muted"], label="Q3 2025")
+    ax.scatter([], [], s=36, color=T["teal"], label="Q3 2026 — higher")
+    ax.scatter([], [], s=36, color=T["burnt"], label="Q3 2026 — lower")
     ax.legend()
     foot(fig, f"4-room · towns with ≥25 transactions in each quarter (3 excluded) · {SRC}")
     print(f"F1: {len(rows)} towns shown · lower in {n_down}")
@@ -99,7 +106,7 @@ def fig1_dumbbell(con):
 
 
 def fig2_rolling(con):
-    series = [("(all)", "Singapore (all towns)", INK, 2.4), ("TAMPINES", "Tampines", PETROL, 1.9), ("SENGKANG", "Sengkang", BURNT, 1.9)]
+    series = [("(all)", "Singapore (all towns)", T["ink"], 2.4), ("TAMPINES", "Tampines", T["petrol"], 1.9), ("SENGKANG", "Sengkang", T["burnt"], 1.9)]
     fig, ax = plt.subplots()
     last = None
     for town, label, color, lw in series:
@@ -156,20 +163,20 @@ def fig3_mix(con):
             grid["OTHER"][i] += n
     order = list(top6) + ["OTHER"]
     palette = {}
-    pool = [TEAL, VIOLET, BRASS, MUTED]
+    pool = [T["teal"], T["violet"], T["brass"], T["muted"]]
     for t in order:
         if t == "TAMPINES":
-            palette[t] = PETROL
+            palette[t] = T["petrol"]
         elif t == "SENGKANG":
-            palette[t] = BURNT
+            palette[t] = T["burnt"]
         elif t == "OTHER":
-            palette[t] = LIGHT
+            palette[t] = T["light"]
         else:
             palette[t] = pool.pop(0)
     shares = [[grid[t][i] / qtot[i] for i in range(len(quarters))] for t in order]
 
     fig, ax = plt.subplots(figsize=(9.5, 4.5))
-    ax.stackplot(quarters, *shares, labels=order, colors=[palette[t] for t in order], edgecolor="white", lw=0.4)
+    ax.stackplot(quarters, *shares, labels=order, colors=[palette[t] for t in order], edgecolor=T["edge"], lw=0.4)
     ax.set_ylim(0, 1)
     ax.set_xlim(quarters[0], quarters[-1])
     ax.xaxis.set_major_locator(mdates.YearLocator())
@@ -181,14 +188,14 @@ def fig3_mix(con):
     handles, labels_ = ax.get_legend_handles_labels()
     ax.legend(handles[::-1], labels_[::-1], loc="center left", bbox_to_anchor=(1.01, 0.5), frameon=False, fontsize=8.5)
     fig.tight_layout(rect=(0, 0.075, 0.83, 1))
-    fig.text(0.01, 0.015, f"Share of quarterly registrations · 2023 Q1 – 2026 Q3 · {SRC}", fontsize=7.5, color=MUTED)
+    fig.text(0.01, 0.015, f"Share of quarterly registrations · 2023 Q1 – 2026 Q3 · {SRC}", fontsize=7.5, color=T["muted"])
     print("F3: top towns —", ", ".join(top6))
     save(fig, "f3_mix_drift.png")
 
 
 def fig4_waterfall(con, d):
     labels = ["Rate\n(within towns)", "Mix\n(town shares)", "Interaction", "Total"]
-    deltas = [("rate", d["rate"], BURNT), ("mix", d["mix"], BURNT), ("inter", d["inter"], TEAL)]
+    deltas = [("rate", d["rate"], T["burnt"]), ("mix", d["mix"], T["burnt"]), ("inter", d["inter"], T["teal"])]
 
     fig, ax = plt.subplots()
     cum = 0.0
@@ -197,14 +204,14 @@ def fig4_waterfall(con, d):
         ax.bar(xs[i], abs(val), bottom=min(cum, cum + val), color=color, width=0.6, zorder=3)
         ax.annotate(f"{val:+.1f}", (xs[i], cum + val), xytext=(0, 8 if val > 0 else -14),
                     textcoords="offset points", ha="center",
-                    va=("bottom" if val > 0 else "top"), fontsize=9, color=INK)
+                    va=("bottom" if val > 0 else "top"), fontsize=9, color=T["ink"])
         if i < len(deltas) - 1:
-            ax.plot([xs[i] + 0.3, xs[i + 1] - 0.3], [cum + val, cum + val], color=LIGHT, lw=0.9, ls="--", zorder=2)
+            ax.plot([xs[i] + 0.3, xs[i + 1] - 0.3], [cum + val, cum + val], color=T["light"], lw=0.9, ls="--", zorder=2)
         cum += val
-    ax.bar(xs[3], abs(d["total"]), bottom=min(0, d["total"]), color=INK, width=0.6, zorder=3)
+    ax.bar(xs[3], abs(d["total"]), bottom=min(0, d["total"]), color=T["ink"], width=0.6, zorder=3)
     ax.annotate(f"{d['total']:+.1f}", (xs[3], d["total"]), xytext=(0, -14),
-                textcoords="offset points", ha="center", va="top", fontsize=9, color=INK)
-    ax.axhline(0, color=MUTED, lw=0.9, zorder=1)
+                textcoords="offset points", ha="center", va="top", fontsize=9, color=T["ink"])
+    ax.axhline(0, color=T["muted"], lw=0.9, zorder=1)
     ax.set_xticks(xs)
     ax.set_xticklabels(labels)
     ax.set_ylim(min(cum, d["total"]) - 28, 34)
@@ -227,11 +234,15 @@ def main():
     run_script(con, ROOT / "sql/03_metrics.sql")
     run_script(con, ROOT / "sql/04_yoy.sql")
     d = decomposition(con, P0, P1)
-    fig1_dumbbell(con)
-    fig2_rolling(con)
-    fig3_mix(con)
-    fig4_waterfall(con, d)
-    print("figures done")
+    for palette in (LIGHT, DARK):
+        use_palette(palette)
+        use_series_style(dark=(palette is DARK))
+        print(f"-- rendering {'dark' if palette['suffix'] else 'light'} set --")
+        fig1_dumbbell(con)
+        fig2_rolling(con)
+        fig3_mix(con)
+        fig4_waterfall(con, d)
+    print("figures done — light + dark")
 
 
 if __name__ == "__main__":

@@ -1,4 +1,8 @@
-![hdb-resale-mart — a six-repo series on Singapore's public data](assets/banner.svg)
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="assets/banner-dark.svg">
+  <source media="(prefers-color-scheme: light)" srcset="assets/banner.svg">
+  <img src="assets/banner.svg" width="100%" alt="hdb-resale-mart — a six-repo series on Singapore's public data">
+</picture>
 
 # hdb-resale-mart
 
@@ -15,14 +19,18 @@
 - **Shift-share** (transaction-weighted, means): total −40.6 S$/m² = rate **−53.3** + mix **−0.7** + interaction **+13.3** (the overlap term — town-weight shifts coinciding with town-price moves; reported, not folded in).
 - **Robust across windows** (totals −0.6% … +1.0%): [`docs/sensitivity.md`](docs/sensitivity.md).
 
-![4-room median price/m² by town — Q3 2026 vs Q3 2025](reports/figures/f1_town_dumbbell.png)
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="reports/figures/f1_town_dumbbell-dark.png">
+  <source media="(prefers-color-scheme: light)" srcset="reports/figures/f1_town_dumbbell.png">
+  <img src="reports/figures/f1_town_dumbbell.png" width="100%" alt="4-room median price/m² by town — Q3 2026 vs Q3 2025">
+</picture>
 
 ### More views
 
 | | |
 |---|---|
-| [![3-month rolling medians of town price/m²](reports/figures/f2_rolling_median.png)](reports/figures/f2_rolling_median.png) | [![Town-mix drift over the sample](reports/figures/f3_mix_drift.png)](reports/figures/f3_mix_drift.png) |
-| [![Rate/mix waterfall of the national move](reports/figures/f4_waterfall.png)](reports/figures/f4_waterfall.png) | [![The Power BI page for this dataset](reports/figures/bi_page.png)](reports/figures/bi_page.png) |
+| <a href="reports/figures/f2_rolling_median.png"><picture><source media="(prefers-color-scheme: dark)" srcset="reports/figures/f2_rolling_median-dark.png"><source media="(prefers-color-scheme: light)" srcset="reports/figures/f2_rolling_median.png"><img src="reports/figures/f2_rolling_median.png" alt="3-month rolling medians of town price/m²"></picture></a> | <a href="reports/figures/f3_mix_drift.png"><picture><source media="(prefers-color-scheme: dark)" srcset="reports/figures/f3_mix_drift-dark.png"><source media="(prefers-color-scheme: light)" srcset="reports/figures/f3_mix_drift.png"><img src="reports/figures/f3_mix_drift.png" alt="Town-mix drift over the sample"></picture></a> |
+| <a href="reports/figures/f4_waterfall.png"><picture><source media="(prefers-color-scheme: dark)" srcset="reports/figures/f4_waterfall-dark.png"><source media="(prefers-color-scheme: light)" srcset="reports/figures/f4_waterfall.png"><img src="reports/figures/f4_waterfall.png" alt="Rate/mix waterfall of the national move"></picture></a> | <a href="reports/figures/bi_page.png"><picture><source media="(prefers-color-scheme: dark)" srcset="reports/figures/bi_page-dark.png"><source media="(prefers-color-scheme: light)" srcset="reports/figures/bi_page.png"><img src="reports/figures/bi_page.png" alt="The Power BI page for this dataset"></picture></a> |
 
 *Rolling medians (`f2`), town-mix drift (`f3`), the rate/mix waterfall (`f4`), and the Power BI page (`bi_page`) — full size in [`reports/figures/`](reports/figures/) · half-page write-up in [`docs/decision_memo.md`](docs/decision_memo.md).*
 
@@ -38,9 +46,18 @@ HDB resale prices are usually reported as a single index. But any move in that i
 
 ## Method (short)
 
-- DuckDB throughout; one row = one registered resale. [`sql/01_staging.sql`](sql/01_staging.sql) cleans (month → date, storey band → midpoint), [`sql/05_checks.sql`](sql/05_checks.sql) validates — 7/7 checks pass, 0 exclusions; [`docs/data_audit.md`](docs/data_audit.md) profiles the file.
-- Town-month medians + 3-month rolling medians ([`sql/03_metrics.sql`](sql/03_metrics.sql)); headline table + shift-share decomposition ([`sql/04_yoy.sql`](sql/04_yoy.sql)) → [`outputs/town_4room_yoy.csv`](outputs/town_4room_yoy.csv).
-- Figures are code-generated ([`src/figures.py`](src/figures.py)); the Power BI page is in [`bi/`](bi/README.md).
+DuckDB throughout; one row = one registered resale. The pipeline, end to end:
+
+1. **Pull** — scripted from data.gov.sg into `data/raw/` (never edited): [`src/download.py`](src/download.py)
+2. **Audit** — profile, then rules set *before* analysis: [`docs/data_audit.md`](docs/data_audit.md)
+3. **Stage** — parse & clean; every exclusion counted: [`sql/01_staging.sql`](sql/01_staging.sql)
+4. **Check** — 7 assertions, fail loudly: [`sql/05_checks.sql`](sql/05_checks.sql) — 7/7 pass, 0 exclusions
+5. **Measure** — town×type×month medians + rolling 3-month medians: [`sql/03_metrics.sql`](sql/03_metrics.sql)
+6. **Decompose** — headline table + shift-share (rate / mix / interaction): [`sql/04_yoy.sql`](sql/04_yoy.sql) → [`outputs/town_4room_yoy.csv`](outputs/town_4room_yoy.csv)
+7. **Stress** — window + threshold variants: [`docs/sensitivity.md`](docs/sensitivity.md)
+8. **Draw · write · present** — figures are code, light + dark ([`src/figures.py`](src/figures.py)); then the memo ([`docs/decision_memo.md`](docs/decision_memo.md)) and the Power BI page ([`bi/`](bi/README.md))
+
+Why each choice was made — why quarters, why medians to display but means to split, why the ≥25 display rule, what was validated — is written out in **[`docs/method.md`](docs/method.md)**.
 
 ## Reproduce
 

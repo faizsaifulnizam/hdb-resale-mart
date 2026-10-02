@@ -1,7 +1,7 @@
-# Sensitivity — 4-room Q3-2026 vs Q3-2025 decomposition (C5)
+# Sensitivity — 4-room Q3-2026 vs Q3-2025 decomposition
 
 Same shift-share method as the headline, re-run under wider windows and the display threshold.
-Reproduce: `python src/analysis.py` → `outputs/sensitivity.csv`. Method: `sql/04_yoy.sql` (spec 01 §4).
+Reproduce: `python src/analysis.py` → `outputs/sensitivity.csv`. Method: [`sql/04_yoy.sql`](../sql/04_yoy.sql).
 
 | variant | towns | total Δ vs level | rate | mix | interaction |
 |---|---|---|---|---|---|
@@ -12,7 +12,7 @@ Reproduce: `python src/analysis.py` → `outputs/sensitivity.csv`. Method: `sql/
 | 12m Oct–Sep | 26 | +0.99% | +31.8 | +25.6 | +12.4 |
 | 12m Oct–Sep · thr25 | 25 | +0.97% | +30.5 | +25.9 | +12.5 |
 
-Rate / mix / interaction in S$/m², 4-room, transaction-weighted by town; total Δ expressed against the period-0 level (~S$7,169/m²). `thr25` = towns with ≥25 four-room transactions in each compared period (the audit's proposed display threshold).
+Rate / mix / interaction in S$/m², 4-room, transaction-weighted by town; total Δ expressed against the period-0 level (~S$7,169/m²). `thr25` = towns with ≥25 four-room transactions in each compared period (the display threshold — see [`data_audit.md`](data_audit.md)).
 
 **What holds across all variants**
 

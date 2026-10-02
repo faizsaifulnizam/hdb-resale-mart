@@ -32,3 +32,5 @@ Method note: medians are shown; means feed the split because medians are not add
 ## What this file cannot say
 
 Why the rate moved — interest rates, BTO supply, grants and cooling measures are context, not tested here. Flat condition, storey and renovation value are unobserved. Related-party and part-share sales are excluded by HDB. And a single quarter is noisy — read the direction against `sensitivity.md`, not one print.
+
+*How it was built, step by step — choices, validation, limits → [`method.md`](method.md).*
