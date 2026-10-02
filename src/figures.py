@@ -95,7 +95,7 @@ def fig1_dumbbell(con):
     ax.xaxis.grid(True)
     ax.yaxis.grid(False)
     ax.set_xlabel("median price S$/m²")
-    ax.set_title(f"4-room resale price per m² — Q3 2026 vs Q3 2025: lower in {n_down} of {len(rows)} towns")
+    ax.set_title(f"4-room resale price per m² — Q3 2026 vs Q3 2025: lower in {n_down} of {len(rows)} towns", fontsize=12)
     ax.scatter([], [], s=26, color=T["muted"], label="Q3 2025")
     ax.scatter([], [], s=36, color=T["teal"], label="Q3 2026 — higher")
     ax.scatter([], [], s=36, color=T["burnt"], label="Q3 2026 — lower")
