@@ -1,6 +1,6 @@
 # Power BI page — 4-room resale, Q3 2026 vs Q3 2025
 
-`bi_page.png` — the page built in Power BI Desktop (free) from `outputs/town_4room_yoy.csv`
+Screenshot: [`reports/figures/bi_page.png`](../reports/figures/bi_page.png) — the page built in Power BI Desktop (free) from `outputs/town_4room_yoy.csv`
 (26 towns, one row per town). Four visuals:
 
 1. **Clustered bar** — median price/m² by town, Q3 2025 vs Q3 2026 (`med_ppsm_2025q3` / `med_ppsm_2026q3`)

@@ -15,7 +15,7 @@
 
 ![4-room median price/m² by town — Q3 2026 vs Q3 2025](reports/figures/f1_town_dumbbell.png)
 
-*Also in `reports/figures/`: rolling medians (`f2`), town-mix drift (`f3`), the rate/mix waterfall (`f4`) — plus the Power BI page [`bi/bi_page.png`](bi/bi_page.png) and the half-page [`docs/decision_memo.md`](docs/decision_memo.md).*
+*Also in `reports/figures/`: rolling medians (`f2`), town-mix drift (`f3`), the rate/mix waterfall (`f4`) — plus the Power BI page [`reports/figures/bi_page.png`](reports/figures/bi_page.png) and the half-page [`docs/decision_memo.md`](docs/decision_memo.md).*
 
 ## The question
 
