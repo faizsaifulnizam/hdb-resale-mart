@@ -1,3 +1,5 @@
+![hdb-resale-mart — a six-repo series on Singapore's public data](assets/banner.svg)
+
 # hdb-resale-mart
 
 > **Answer:** 4-room resale price per m² **slipped 1.3%** in Q3 2026 vs a year earlier — national median S$6,647 → **S$6,559/m²** — and the move decomposes almost entirely into **within-town pricing** (rate −53.3 S$/m²) rather than a change in which towns sold (mix −0.7, ≈ 0). A slight dip; a rate story; one quarter.
