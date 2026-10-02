@@ -44,7 +44,7 @@ HDB resale prices are usually reported as a single index. But any move in that i
 - Licence: Singapore Open Data Licence (© Housing & Development Board). A script downloads the file into `data/raw/` (gitignored); the raw file is never edited.
 - Cite note carried from HDB: prices are indicative; transactions between relatives and part-share sales are excluded.
 
-## Method (short)
+## Method
 
 DuckDB throughout; one row = one registered resale. The pipeline, end to end:
 
@@ -57,7 +57,50 @@ DuckDB throughout; one row = one registered resale. The pipeline, end to end:
 7. **Stress** — window + threshold variants: [`docs/sensitivity.md`](docs/sensitivity.md)
 8. **Draw · write · present** — figures are code, light + dark ([`src/figures.py`](src/figures.py)); then the memo ([`docs/decision_memo.md`](docs/decision_memo.md)) and the Power BI page ([`bi/`](bi/README.md))
 
-Why each choice was made — why quarters, why medians to display but means to split, why the ≥25 display rule, what was validated — is written out in **[`docs/method.md`](docs/method.md)**.
+### The comparison, made computable
+
+National stats report a *single* price index; the question here is what moved inside it — **did 4-room flats get more expensive per m² (rate), or did the mix of towns sold change (mix)?** Three choices make that answerable: a like-for-like window — **Q3 2026 vs Q3 2025**, same quarter a year earlier (quarters absorb month noise; same-quarter kills seasonality); a size-independent price — **price per m²** (`resale_price ÷ floor_area_sqm`), 4-room flats only; and a decomposition that splits the per-m² move — **shift-share**, next.
+
+### The decomposition (the core, in words)
+
+Shift-share on quarterly town **means** (p), weighted by each town's share of 4-room transactions (w):
+
+```text
+total       = Σ w₁·p₁ − Σ w₀·p₀     the mean price-level move
+            = Σ w₀·(p₁ − p₀)        rate        — within-town price moves
+            + Σ (w₁ − w₀)·p₀        mix         — where the transactions went
+            + Σ (w₁ − w₀)·(p₁ − p₀) interaction — moves × weight shifts, together
+```
+
+**Rate** answers "same towns, new prices"; **mix** answers "different towns, old prices"; **interaction** is both at once — reported on its own, not folded into either side. This build: rate **−53.3** · mix **−0.7** · interaction **+13.3** S$/m² → the move is a **rate story**; mix nets to ≈0 because town gains and losses offset ([memo](docs/decision_memo.md) has the detail). **Why means inside the split:** medians are not additive — median(A+B) ≠ median(A) + median(B) — so that identity only holds on means; medians remain the *display* metric because they resist tails. Stated rather than hidden. The code asserts the identity (ε = 1e-9).
+
+### Rules chosen, and why
+
+| Rule | Choice | Why |
+|------|--------|-----|
+| Comparison | Q3 2026 vs Q3 2025 | like-for-like; seasonality-free |
+| Display threshold | ≥ 25 sales in **each** compared quarter | tiny-town medians are noise; drops 3 towns from headline charts — they stay in the CSV (display rule only) |
+| Outliers | none applied | data is structurally clean; tails are real small-flat high-S$/m² cases; winsorising would hide them |
+| Trend window | 2023-01 → 2026-09 | post-cooling-measures era; long enough to see the mix drift |
+
+### Validation — receipts, not claims
+
+- **7/7 checks** pass on the staged table; **0 exclusions** beyond the documented window/type filters — every exclusion is counted by [`src/build_dataset.py`](src/build_dataset.py).
+- **Independent recompute:** 3 town-month medians + rolling medians recomputed in plain Python stdlib (no pandas/DuckDB), matched.
+- **Identity assert** on the decomposition (above); **sensitivity** — the read holds across 3/6/12-month windows and with/without the threshold ([`docs/sensitivity.md`](docs/sensitivity.md)).
+- **Stranger-rerun:** fresh clone → the four commands below → the pipeline reproduces the committed outputs for the same pull (a later re-pull can move the newest months).
+
+### Limits
+
+**Not a forecast; not causal.** Registrations revise upward, one quarter is noisy (read it against [`docs/sensitivity.md`](docs/sensitivity.md)), and context — interest rates, BTO supply, grants — is out of scope. The full list lives under **Caveats** below.
+
+### Principles this repo follows
+
+1. **One question per repo** — the method serves the question, not the reverse.
+2. **Audit before analysis** — rules come from the data's profile, not habit.
+3. **SQL first** — the analysis lives in `sql/`; Python glues and draws.
+4. **Nothing hand-edited** — raw data immutable; every number regenerates from code.
+5. **Limits are part of the deliverable.**
 
 ## Reproduce
 
