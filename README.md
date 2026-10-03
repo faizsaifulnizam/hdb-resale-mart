@@ -137,6 +137,6 @@ Code: MIT. Data: Singapore Open Data Licence — © Housing & Development Board,
 
 ---
 
-*Part of a six-repo series on Singapore's public data — the other five repos go live as they're built:* **[card-book-quality](https://github.com/faizsaifulnizam/card-book-quality)** · **coe-quota-premium · retail-sales-split · coe-category-break · hdb-lease-slope**
+*Part of a six-repo series on Singapore's public data — the other five repos go live as they're built:* **[card-book-quality](https://github.com/faizsaifulnizam/card-book-quality)** · **[coe-quota-premium](https://github.com/faizsaifulnizam/coe-quota-premium)** · **[retail-sales-split](https://github.com/faizsaifulnizam/retail-sales-split)** · **coe-category-break · hdb-lease-slope**
 
 *If you found this useful, a star helps others find it.*
