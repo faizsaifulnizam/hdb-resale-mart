@@ -6,7 +6,7 @@
 
 # hdb-resale-mart
 
-[![license: MIT](https://img.shields.io/badge/license-MIT-22607B.svg)](LICENSE) ![Python 3.12](https://img.shields.io/badge/Python-3.12-2E7D6B.svg) ![DuckDB](https://img.shields.io/badge/analytics-DuckDB-C0552B.svg) [![data: data.gov.sg](https://img.shields.io/badge/data-data.gov.sg-14293D.svg)](https://data.gov.sg/datasets/d_8b84c4ee58e3cfc0ece0d773c8ca6abc/view) [![Power BI page](https://img.shields.io/badge/Power%20BI-page%20included-8A6EAF.svg)](bi/README.md)
+[![CI](https://github.com/faizsaifulnizam/hdb-resale-mart/actions/workflows/ci.yml/badge.svg)](https://github.com/faizsaifulnizam/hdb-resale-mart/actions/workflows/ci.yml) [![license: MIT](https://img.shields.io/badge/license-MIT-22607B.svg)](LICENSE) ![Python 3.12](https://img.shields.io/badge/Python-3.12-2E7D6B.svg) ![DuckDB](https://img.shields.io/badge/analytics-DuckDB-C0552B.svg) [![data: data.gov.sg](https://img.shields.io/badge/data-data.gov.sg-14293D.svg)](https://data.gov.sg/datasets/d_8b84c4ee58e3cfc0ece0d773c8ca6abc/view) [![Power BI page](https://img.shields.io/badge/Power%20BI-page%20included-8A6EAF.svg)](bi/README.md)
 
 > **Answer:** 4-room resale price per m² dipped in Q3 2026 vs a year earlier: **−1.3%** on the headline median (S$6,647 → **S$6,559/m²**) and **−0.6%** on the mean basis used for the decomposition — both point the same way (the split needs means because medians are not additive). The move is **within-town, not mix**: rate −53.3 S$/m² vs mix −0.7, interaction +13.3 reported separately. A small dip; a rate story; one quarter.
 
@@ -89,6 +89,7 @@ total       = Σ w₁·p₁ − Σ w₀·p₀     the mean price-level move
 - **Independent recompute:** 3 town-month medians + rolling medians recomputed in plain Python stdlib (no pandas/DuckDB), matched.
 - **Identity assert** on the decomposition (above); **sensitivity** — the read holds across 3/6/12-month windows and with/without the threshold ([`docs/sensitivity.md`](docs/sensitivity.md)).
 - **Stranger-rerun:** fresh clone → the four commands below → the pipeline reproduces the committed outputs for the same pull (a later re-pull can move the newest months).
+- **CI smoke tests:** every push and PR re-checks the committed outputs and figures — [`.github/workflows/ci.yml`](.github/workflows/ci.yml).
 
 ### Limits
 
@@ -136,3 +137,5 @@ Code: MIT. Data: Singapore Open Data Licence — © Housing & Development Board,
 ---
 
 *Part of a six-repo series on Singapore's public data — the other five repos go live as they're built:* **card-book-quality · coe-quota-premium · retail-sales-split · coe-category-break · hdb-lease-slope**
+
+*If you found this useful, a star helps others find it.*
