@@ -48,10 +48,10 @@ HDB resale prices are usually reported as a single index. But any move in that i
 
 DuckDB throughout; one row = one registered resale. The pipeline, end to end:
 
-1. **Pull** — scripted from data.gov.sg into `data/raw/` (never edited): [`src/download.py`](src/download.py)
+1. **Pull** — scripted from data.gov.sg into `data/raw/` (never edited) + a pull manifest (SHA-256, rows, month coverage): [`src/download.py`](src/download.py)
 2. **Audit** — profile, then rules set *before* analysis: [`docs/data_audit.md`](docs/data_audit.md)
 3. **Stage** — parse & clean; every exclusion counted: [`sql/01_staging.sql`](sql/01_staging.sql)
-4. **Check** — 7 assertions, fail loudly: [`sql/05_checks.sql`](sql/05_checks.sql) — 7/7 pass, 0 exclusions
+4. **Check** — 7 assertions, run *before* the dataset is written; failures leave existing files untouched: [`sql/05_checks.sql`](sql/05_checks.sql) — 7/7 pass, 0 exclusions
 5. **Measure** — town×type×month medians + rolling 3-month medians: [`sql/03_metrics.sql`](sql/03_metrics.sql)
 6. **Decompose** — headline table + shift-share (rate / mix / interaction): [`sql/04_yoy.sql`](sql/04_yoy.sql) → [`outputs/town_4room_yoy.csv`](outputs/town_4room_yoy.csv)
 7. **Stress** — window + threshold variants: [`docs/sensitivity.md`](docs/sensitivity.md)
@@ -59,7 +59,7 @@ DuckDB throughout; one row = one registered resale. The pipeline, end to end:
 
 ### The comparison, made computable
 
-National stats report a *single* price index; the question here is what moved inside it — **did 4-room flats get more expensive per m² (rate), or did the mix of towns sold change (mix)?** Three choices make that answerable: a like-for-like window — **Q3 2026 vs Q3 2025**, same quarter a year earlier (quarters absorb month noise; same-quarter kills seasonality); a size-independent price — **price per m²** (`resale_price ÷ floor_area_sqm`), 4-room flats only; and a decomposition that splits the per-m² move — **shift-share**, next.
+National stats report a *single* price index; the question here is what moved inside it — **did 4-room flats get more expensive per m² (rate), or did the mix of towns sold change (mix)?** Three choices make that answerable: a like-for-like window — **Q3 2026 vs Q3 2025**, same quarter a year earlier (quarters absorb month noise; the same-quarter comparison reduces seasonal differences); a price normalized by floor area — **price per m²** (`resale_price ÷ floor_area_sqm`), 4-room flats only; and a decomposition that splits the per-m² move — **shift-share**, next.
 
 ### The decomposition (the core, in words)
 
@@ -72,13 +72,13 @@ total       = Σ w₁·p₁ − Σ w₀·p₀     the mean price-level move
             + Σ (w₁ − w₀)·(p₁ − p₀) interaction — moves × weight shifts, together
 ```
 
-**Rate** answers "same towns, new prices"; **mix** answers "different towns, old prices"; **interaction** is both at once — reported on its own, not folded into either side. This build: rate **−53.3** · mix **−0.7** · interaction **+13.3** S$/m² → the move is a **rate story**; mix nets to ≈0 because town gains and losses offset ([memo](docs/decision_memo.md) has the detail). **Why means inside the split:** medians are not additive — median(A+B) ≠ median(A) + median(B) — so that identity only holds on means; medians remain the *display* metric because they resist tails. Stated rather than hidden. The code asserts the identity (ε = 1e-9).
+**Rate** answers "same towns, new prices"; **mix** answers "different towns, old prices"; **interaction** is both at once — reported on its own, not folded into either side. Scope of **rate**: it is the change in *town-average* price per m² — within a town it still includes changes in the kinds of flats sold (block, storey, lease age, model); floor area is the only attribute normalized for. This build: rate **−53.3** · mix **−0.7** · interaction **+13.3** S$/m² → the move is a **rate story**; mix nets to ≈0 because town gains and losses offset ([memo](docs/decision_memo.md) has the detail). **Why means inside the split:** medians are not additive — median(A+B) ≠ median(A) + median(B) — so that identity only holds on means; medians remain the *display* metric because they resist tails. Stated rather than hidden. The code asserts the identity (ε = 1e-9).
 
 ### Rules chosen, and why
 
 | Rule | Choice | Why |
 |------|--------|-----|
-| Comparison | Q3 2026 vs Q3 2025 | like-for-like; seasonality-free |
+| Comparison | Q3 2026 vs Q3 2025 | same quarter, like-for-like; reduces seasonality |
 | Display threshold | ≥ 25 sales in **each** compared quarter | tiny-town medians are noise; drops 3 towns from headline charts — they stay in the CSV (display rule only) |
 | Outliers | none applied | data is structurally clean; tails are real small-flat high-S$/m² cases; winsorising would hide them |
 | Trend window | 2023-01 → 2026-09 | post-cooling-measures era; long enough to see the mix drift |
@@ -87,7 +87,8 @@ total       = Σ w₁·p₁ − Σ w₀·p₀     the mean price-level move
 
 - **7/7 checks** pass on the staged table; **0 exclusions** beyond the documented window/type filters — every exclusion is counted by [`src/build_dataset.py`](src/build_dataset.py).
 - **Independent recompute:** 3 town-month medians + rolling medians recomputed in plain Python stdlib (no pandas/DuckDB), matched.
-- **Identity assert** on the decomposition (above); **sensitivity** — the read holds across 3/6/12-month windows and with/without the threshold ([`docs/sensitivity.md`](docs/sensitivity.md)).
+- **Identity assert** on the decomposition (above); **sensitivity** — direction holds across 3/6/12-month windows and with/without the threshold; the component mix shifts with the window and the threshold moves magnitudes, not direction ([`docs/sensitivity.md`](docs/sensitivity.md)).
+- **Rounding:** contribution columns in the CSV are display-rounded to 2 dp; component sums may differ from the full-precision national figures by ≲0.05 S$/m².
 - **Stranger-rerun:** fresh clone → the four commands below → the pipeline reproduces the committed outputs for the same pull (a later re-pull can move the newest months).
 
 ### Limits
@@ -120,7 +121,7 @@ Then check `outputs/town_4room_yoy.csv`: Queenstown reads 10,666.67 → 11,833.3
 
 ## Caveats
 
-- Registrations, not listings; the newest months can revise upward as registrations complete.
+- Registrations, not listings; the newest months can revise upward as registrations complete — the compared quarters are calendar-complete but not revision-final.
 - Medians are the display metric; the decomposition uses transaction-weighted means (medians are not additive — see the memo).
 - Display threshold: towns with <25 sales in a compared quarter stay in the CSV but are dropped from headline charts (3 towns at this build).
 - Descriptive only — no forecast, no causal claim. Context (interest rates, BTO supply, grants) is out of scope.

@@ -4,8 +4,9 @@ Run: python src/analysis.py   (from the repo root; reads data/processed/sales.pa
 Receipts printed:
   1. dims + metrics row counts
   2. hand-checks: 3 town-month medians/rolling medians recomputed independently (stdlib statistics)
-  3. decomposition assert: rate + mix + interaction == total (epsilon 1e-9)
+  3. decomposition assert: rate + mix + interaction == total (epsilon 1e-9) + headline coverage
   4. sensitivity table (window + threshold variants) -> outputs/sensitivity.csv
+Validation runs BEFORE any output file is written; a failing run leaves existing outputs untouched.
 Writes: outputs/town_4room_yoy.csv (via sql/04) · outputs/sensitivity.csv
 """
 import csv
@@ -58,7 +59,11 @@ def prev_months(month, k):
 
 
 def decomposition(con, p0, p1, min_n=0):
-    """National shift-share totals for two periods (4-room, by town). min_n filters towns."""
+    """National shift-share totals for two periods (4-room, by town).
+
+    Towns must have transactions in BOTH periods (min_n filters small towns on top).
+    Returns coverage counts; raises on an empty comparison instead of reporting zeros.
+    """
     sql = f"""
     WITH base AS (
         SELECT town,
@@ -93,12 +98,19 @@ def decomposition(con, p0, p1, min_n=0):
            sum(w_t0 * (p_t1 - p_t0))           AS rate,
            sum((w_t1 - w_t0) * p_t0)           AS mix,
            sum((w_t1 - w_t0) * (p_t1 - p_t0))  AS inter,
-           count(*)                            AS towns
+           count(*)                            AS towns,
+           (SELECT count(*) FROM piv)          AS towns_total
     FROM w
     """
     row = q(con, sql)[0]
+    towns, towns_total = int(row[5]), int(row[6])
+    if towns == 0:
+        raise ValueError(
+            f"no towns with transactions in both periods ({p0[0]}..{p0[1]} vs {p1[0]}..{p1[1]}) — "
+            "refusing to report a national comparison")
     vals = [float(v) if v is not None else 0.0 for v in row[:5]]
-    return dict(zip(["level_t0", "total", "rate", "mix", "inter"], vals)) | {"towns": int(row[5])}
+    return dict(zip(["level_t0", "total", "rate", "mix", "inter"], vals)) | {
+        "towns": towns, "towns_total": towns_total, "towns_dropped": towns_total - towns}
 
 
 def check_cell(con, town, flat_type, month):
@@ -144,17 +156,7 @@ def main():
         failed |= not check_cell(con, town, ft, m)
 
     print()
-    print("== headline table (sql/04): 4-room Q3-2026 vs Q3-2025 ==")
-    run_script(con, ROOT / "sql/04_yoy.sql")
-    print("towns in table:", q(con, "SELECT count(*) FROM yoy_4room")[0][0])
-    csv_path = OUT / "town_4room_yoy.csv"
-    print("wrote:", csv_path.as_posix(), f"({csv_path.stat().st_size} bytes)")
-    print("top 6 towns (by Q3-2026 volume):")
-    for r in q(con, """SELECT town, n_t0, n_t1, round(med_t0), round(med_t1),
-                              round(100 * (med_t1 / med_t0 - 1), 1)
-                       FROM yoy_4room ORDER BY n_t1 DESC LIMIT 6"""):
-        print(f"   {r[0]:<15} n {r[1]}->{r[2]} · median {r[3]}->{r[4]} S$/m2 ({r[5]:+.1f}%)")
-
+    print("== validation (runs BEFORE any file is written) ==")
     nat_med = q(con, f"""SELECT median(price_per_sqm) FILTER (WHERE sale_date BETWEEN DATE '{P1[0]}' AND DATE '{P1[1]}'),
                                 median(price_per_sqm) FILTER (WHERE sale_date BETWEEN DATE '{P0[0]}' AND DATE '{P0[1]}')
                          FROM sales WHERE flat_type = '4 ROOM'
@@ -165,7 +167,7 @@ def main():
     d = decomposition(con, P0, P1)
     print(f"national decomposition (means): level t0 {d['level_t0']:.2f} | "
           f"total {d['total']:+.2f} | rate {d['rate']:+.2f} | mix {d['mix']:+.2f} | "
-          f"interaction {d['inter']:+.2f} S$/m2 | towns {d['towns']}")
+          f"interaction {d['inter']:+.2f} S$/m2 | towns {d['towns']}/{d['towns_total']}")
     eps = 1e-9 * max(1.0, abs(d["total"]))
     ok1 = abs(d["rate"] + d["mix"] + d["inter"] - d["total"]) <= eps
     print(f"   [{'PASS' if ok1 else 'FAIL'}] rate + mix + interaction == total (eps {eps:.1e})")
@@ -175,7 +177,27 @@ def main():
                        AND sale_date BETWEEN DATE '{P0[0]}' AND DATE '{P1[1]}'""")[0][0]
     ok2 = abs(float(nat) - d["total"]) < 1e-6
     print(f"   [{'PASS' if ok2 else 'FAIL'}] total == direct mean difference ({float(nat):+.4f})")
-    failed |= not (ok1 and ok2)
+    ok3 = d["towns"] == d["towns_total"]
+    print(f"   [{'PASS' if ok3 else 'FAIL'}] headline coverage: {d['towns']}/{d['towns_total']} towns in both quarters"
+          + ("" if ok3 else f" — {d['towns_dropped']} dropped; not a national comparison"))
+    failed |= not (ok1 and ok2 and ok3)
+
+    if failed:
+        print()
+        print("validation failed — output files NOT written (existing outputs left untouched)")
+        sys.exit(1)
+
+    print()
+    print("== headline table (sql/04): 4-room Q3-2026 vs Q3-2025 ==")
+    run_script(con, ROOT / "sql/04_yoy.sql")
+    print("towns in table:", q(con, "SELECT count(*) FROM yoy_4room")[0][0])
+    csv_path = OUT / "town_4room_yoy.csv"
+    print("wrote:", csv_path.as_posix(), f"({csv_path.stat().st_size} bytes)")
+    print("top 6 towns (by Q3-2026 volume):")
+    for r in q(con, """SELECT town, n_t0, n_t1, round(med_t0), round(med_t1),
+                              round(100 * (med_t1 / med_t0 - 1), 1)
+                       FROM yoy_4room ORDER BY n_t1 DESC LIMIT 6"""):
+        print(f"   {r[0]:<15} n {r[1]}->{r[2]} · median {r[3]}->{r[4]} S$/m2 ({r[5]:+.1f}%)")
 
     print()
     print("== sensitivity (C5): windows + threshold variants ==")
@@ -191,21 +213,19 @@ def main():
     for label, a, b, mn in variants:
         d = decomposition(con, a, b, mn)
         pct = 100 * d["total"] / d["level_t0"]
-        denom = d["total"] if abs(d["total"]) > 1e-9 else 1.0
         srows.append({
             "variant": label,
             "towns": d["towns"],
+            "towns_dropped": d["towns_dropped"],
             "level_t0": round(d["level_t0"], 2),
             "total_delta": round(d["total"], 2),
             "total_pct": round(pct, 3),
             "rate": round(d["rate"], 2),
             "mix": round(d["mix"], 2),
             "interaction": round(d["inter"], 2),
-            "rate_share_pct": round(100 * d["rate"] / denom, 1),
-            "mix_share_pct": round(100 * d["mix"] / denom, 1),
-            "inter_share_pct": round(100 * d["inter"] / denom, 1),
         })
-        print(f"   {label:<20} towns {d['towns']:>2} · total {pct:+.2f}% · "
+        drop = f" ({d['towns_dropped']} dropped)" if d["towns_dropped"] else ""
+        print(f"   {label:<20} towns {d['towns']:>2}{drop} · total {pct:+.2f}% · "
               f"rate {d['rate']:+.1f} / mix {d['mix']:+.1f} / inter {d['inter']:+.1f} S$/m2")
     sens_path = OUT / "sensitivity.csv"
     with sens_path.open("w", newline="", encoding="utf-8") as f:
@@ -215,8 +235,8 @@ def main():
     print("wrote:", sens_path.as_posix(), f"({sens_path.stat().st_size} bytes)")
 
     print()
-    print("RESULT:", "FAIL" if failed else "ALL CHECKS PASS")
-    sys.exit(1 if failed else 0)
+    print("RESULT: ALL CHECKS PASS")
+    sys.exit(0)
 
 
 if __name__ == "__main__":

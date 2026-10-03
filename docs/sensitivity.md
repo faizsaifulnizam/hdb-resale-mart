@@ -18,11 +18,11 @@ Rate / mix / interaction in S$/m², 4-room, transaction-weighted by town; total 
 
 - The total per-m² move stays small — from −0.6% to +1.0%. No window turns the headline into a big rise or fall.
 - Within-town movement (rate) carries the sign of the total at every horizon; town-mix is ≈0 at the one-quarter horizon.
-- Mix turns materially positive only over the full year (+25.6 S$/m², ≈+0.36%), under either threshold.
-- The display threshold shifts magnitudes by a few S$/m² — signs and story unchanged.
+- Mix is ≈0 at the quarter horizon but turns materially positive beyond it — **+25.1 S$/m² at six months** and **+25.6 over the year** (≈+0.36% of the period-0 level) — offsetting most of the rate contribution there, under either threshold.
+- The display threshold moves magnitudes materially, not direction: dropping the three below-threshold towns lifts the Q3 total from −40.6 to −23.3 S$/m² (rate −53.3 → −38.5; total −0.57% → −0.33%).
 
 **Where the sensitivity bites**
 
-- A single quarter is noisy; over 6 months the total flattens to ≈0 because a positive mix contribution starts to offset the negative rate contribution.
+- A single quarter is noisy; over 6 months the total flattens to ≈0 because a positive mix contribution starts to offset the negative rate contribution. Component *shares* of a near-zero total are meaningless by construction (six-month rate ÷ total ≈ +3,300%) — read components in S$/m², as above.
 
 Figures and the memo use the Q3 base variant; both may cite this file as the robustness check.

@@ -3,10 +3,13 @@
 --   n           = transactions in the month
 --   med_ppsm    = median price/m² that month (display series)
 --   mean_ppsm   = mean price/m² (feeds decomposition checks)
---   n_3m        = transactions, trailing 3 months
---   r3_med_ppsm = rolling 3-month median — median of the trailing 3 monthly medians
+--   n_3m        = transactions in the trailing 3 CALENDAR months (missing months contribute 0)
+--   r3_med_ppsm = rolling 3-month median — median of the last 3 monthly medians in the
+--                 calendar window (missing months contribute no median)
 -- Window: full history, months up to and including 2026-09
 -- (2026-10 is partial — see docs/data_audit.md).
+-- The frame is calendar-aware (RANGE over months), not row-count based: a town-month with
+-- gaps must not reach back further than three calendar months.
 
 CREATE OR REPLACE TABLE town_month_metrics AS
 WITH monthly AS (
@@ -34,5 +37,5 @@ FROM monthly
 WINDOW w AS (
     PARTITION BY town, flat_type
     ORDER BY sale_month
-    ROWS BETWEEN 2 PRECEDING AND CURRENT ROW
+    RANGE BETWEEN INTERVAL 2 MONTH PRECEDING AND CURRENT ROW
 );

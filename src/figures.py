@@ -11,6 +11,8 @@ import sys
 from datetime import date
 from pathlib import Path
 
+import json
+
 import matplotlib
 
 matplotlib.use("Agg")
@@ -49,7 +51,19 @@ def use_palette(p):
     T = p
 
 
-SRC = "Source: HDB resale registrations via data.gov.sg (© HDB), pulled 2026-10-02"
+MANIFEST = ROOT / "data/raw/pull_manifest.json"
+
+
+def _source_date():
+    """Pull date from the raw-data manifest (falls back to the last known manual pull)."""
+    try:
+        ts = json.loads(MANIFEST.read_text(encoding="utf-8")).get("retrieved_at", "")
+        return ts[:10] or None
+    except Exception:
+        return None
+
+
+SRC = f"Source: HDB resale registrations via data.gov.sg (© HDB), pulled {_source_date() or '2026-10-02'}"
 
 
 def q(con, sql):
@@ -126,7 +140,7 @@ def fig2_rolling(con):
     ax.yaxis.grid(True)
     ax.xaxis.grid(False)
     ax.set_ylabel("S$/m² (rolling 3-month median)")
-    ax.set_title("Rolling 3-month median — 4-room resale price per m²")
+    ax.set_title("Rolling 3-month median of the last 3 monthly medians\n4-room resale price per m²")
     foot(fig, f"Monthly medians · Tampines (mature) · Sengkang (non-mature) · {SRC}")
     print("F2: series plotted —", ", ".join(s[1] for s in series))
     save(fig, "f2_rolling_median.png")

@@ -1,6 +1,6 @@
 # Power BI page — 4-room resale, Q3 2026 vs Q3 2025
 
-Screenshot: [`reports/figures/bi_page.png`](../reports/figures/bi_page.png) — the page built in Power BI Desktop (free) from `outputs/town_4room_yoy.csv` (26 towns, one row per town). A finding strip — three KPI cards: **26 towns** in the comparison · **3,270 resales** (Q3 2026 vs Q3 2025, +7%) · **−1.64%** median of the 26 towns' changes (distinct from the national headline — it's the median across towns, not a national figure) — sits above four visuals:
+Screenshot: [`reports/figures/bi_page.png`](../reports/figures/bi_page.png) — the page built in Power BI Desktop (free) from `outputs/town_4room_yoy.csv` (26 towns, one row per town). A finding strip — three KPI cards: **26 towns** in the comparison · **3,270 resales** (Q3 2026 vs Q3 2025, +7%) · **−1.64%** median of the 26 towns' changes (distinct from the national headline — it's the median across towns, not a national figure) — sits above four visuals. The footer carries the source line, the national decomposition totals (rate −53.3 · mix −0.7 · interaction +13.3 · total −40.6 S$/m²), and a pointer to the full town table — the on-page table scrolls, so the PNG is an overview of all 26 towns, not the whole list.
 
 1. **Clustered bar** — median price/m² by town, Q3 2025 vs Q3 2026 (`med_ppsm_2025q3` / `med_ppsm_2026q3`)
 2. **Clustered column** — shift-share components by town (`rate_effect`, `mix_effect`, `interaction`)
@@ -14,5 +14,6 @@ Both theme renders ship: [`bi_page.png`](../reports/figures/bi_page.png) (light)
 **Notes**
 
 - The `.pbix` is a binary and is not committed — it ships via [Releases](https://github.com/faizsaifulnizam/hdb-resale-mart/releases) (open it to refresh data via Home → Refresh after re-running `python src/analysis.py`).
+- Chart legends and table headers use plain-English labels ("Q3 2025", "Rate (S$/m²)", "Sales, Q3 2025", …) rather than auto-generated "Sum of med_ppsm…" field names.
 - This page shows all 26 towns — the ≥25-transactions display threshold applies to the matplotlib figures only.
 - Medians are the display metric; the shift-share decomposition uses means (medians are not additive — see the decision memo).
