@@ -144,6 +144,6 @@ Code: MIT. Data: Singapore Open Data Licence — © Housing & Development Board,
 
 ---
 
-*Part of a six-repo series on Singapore's public data:* **[card-book-quality](https://github.com/faizsaifulnizam/card-book-quality)** · **[coe-quota-premium](https://github.com/faizsaifulnizam/coe-quota-premium)** · **[retail-sales-split](https://github.com/faizsaifulnizam/retail-sales-split)** · **[coe-category-break](https://github.com/faizsaifulnizam/coe-category-break)** · **[hdb-lease-slope](https://github.com/faizsaifulnizam/hdb-lease-slope)**
+*Six-on-SG: six Singapore-data analyses plus one AI workflow — seven repos:* **[card-book-quality](https://github.com/faizsaifulnizam/card-book-quality)** · **[coe-quota-premium](https://github.com/faizsaifulnizam/coe-quota-premium)** · **[retail-sales-split](https://github.com/faizsaifulnizam/retail-sales-split)** · **[coe-category-break](https://github.com/faizsaifulnizam/coe-category-break)** · **[hdb-lease-slope](https://github.com/faizsaifulnizam/hdb-lease-slope)** · **[ai-analyst-workflow](https://github.com/faizsaifulnizam/ai-analyst-workflow)** (the AI-workflow add)
 
 *If you found this useful, a star helps others find it.*
