@@ -1,0 +1,140 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.13.0/schema.json",
+  "name": "b9954a00339794ba1056",
+  "position": {
+    "x": 32,
+    "y": 274,
+    "z": 0,
+    "height": 375,
+    "width": 916,
+    "tabOrder": 0
+  },
+  "visual": {
+    "visualType": "clusteredBarChart",
+    "query": {
+      "queryState": {
+        "Category": {
+          "projections": [
+            {
+              "field": {
+                "Column": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "town_4room_yoy"
+                    }
+                  },
+                  "Property": "town"
+                }
+              },
+              "queryRef": "town_4room_yoy.town",
+              "nativeQueryRef": "town",
+              "active": true
+            }
+          ]
+        },
+        "Y": {
+          "projections": [
+            {
+              "field": {
+                "Aggregation": {
+                  "Expression": {
+                    "Column": {
+                      "Expression": {
+                        "SourceRef": {
+                          "Entity": "town_4room_yoy"
+                        }
+                      },
+                      "Property": "med_ppsm_2025q3"
+                    }
+                  },
+                  "Function": 0
+                }
+              },
+              "queryRef": "Sum(town_4room_yoy.med_ppsm_2025q3)",
+              "nativeQueryRef": "Q3 2025",
+              "displayName": "Q3 2025"
+            },
+            {
+              "field": {
+                "Aggregation": {
+                  "Expression": {
+                    "Column": {
+                      "Expression": {
+                        "SourceRef": {
+                          "Entity": "town_4room_yoy"
+                        }
+                      },
+                      "Property": "med_ppsm_2026q3"
+                    }
+                  },
+                  "Function": 0
+                }
+              },
+              "queryRef": "Sum(town_4room_yoy.med_ppsm_2026q3)",
+              "nativeQueryRef": "Q3 2026",
+              "displayName": "Q3 2026"
+            }
+          ]
+        }
+      },
+      "sortDefinition": {
+        "sort": [
+          {
+            "field": {
+              "Aggregation": {
+                "Expression": {
+                  "Column": {
+                    "Expression": {
+                      "SourceRef": {
+                        "Entity": "town_4room_yoy"
+                      }
+                    },
+                    "Property": "med_ppsm_2026q3"
+                  }
+                },
+                "Function": 0
+              }
+            },
+            "direction": "Descending"
+          }
+        ]
+      }
+    },
+    "visualContainerObjects": {
+      "title": [
+        {
+          "properties": {
+            "show": {
+              "expr": {
+                "Literal": {
+                  "Value": "true"
+                }
+              }
+            },
+            "text": {
+              "expr": {
+                "Literal": {
+                  "Value": "'Median price per m² by town — Q3 2025 vs Q3 2026'"
+                }
+              }
+            }
+          }
+        }
+      ],
+      "general": [
+        {
+          "properties": {
+            "altText": {
+              "expr": {
+                "Literal": {
+                  "Value": "'Clustered bar chart: median resale price per square metre by town, Q3 2025 compared with Q3 2026.'"
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
+    "drillFilterOtherVisuals": true
+  }
+}

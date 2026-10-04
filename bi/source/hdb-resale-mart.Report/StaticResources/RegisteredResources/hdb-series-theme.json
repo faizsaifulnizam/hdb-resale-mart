@@ -1,0 +1,214 @@
+{
+  "name": "hdb-series-theme.json",
+  "dataColors": [
+    "#22607B",
+    "#C0552B",
+    "#2E7D6B",
+    "#8A6EAF",
+    "#B9975B",
+    "#5C6B79",
+    "#E7E3DC",
+    "#14293D"
+  ],
+  "background": "#FBFBF9",
+  "foreground": "#14293D",
+  "tableAccent": "#22607B",
+  "good": "#2E7D6B",
+  "neutral": "#5C6B79",
+  "bad": "#C0552B",
+  "textClasses": {
+    "title": {
+      "fontFace": "Source Serif 4",
+      "fontSize": 15,
+      "color": "#14293D"
+    },
+    "header": {
+      "fontFace": "Inter",
+      "fontSize": 11,
+      "color": "#5C6B79"
+    },
+    "label": {
+      "fontFace": "Inter",
+      "fontSize": 10,
+      "color": "#5C6B79"
+    },
+    "callout": {
+      "fontFace": "Source Serif 4",
+      "fontSize": 30,
+      "color": "#14293D"
+    }
+  },
+  "visualStyles": {
+    "*": {
+      "*": {
+        "background": [
+          {
+            "show": false
+          }
+        ],
+        "border": [
+          {
+            "show": false
+          }
+        ],
+        "dropShadow": [
+          {
+            "show": false
+          }
+        ],
+        "title": [
+          {
+            "show": true,
+            "fontFamily": "Source Serif 4",
+            "fontSize": 15,
+            "fontColor": {
+              "solid": {
+                "color": "#14293D"
+              }
+            },
+            "alignment": "left"
+          }
+        ],
+        "subTitle": [
+          {
+            "show": false
+          }
+        ],
+        "visualHeader": [
+          {
+            "show": false
+          }
+        ],
+        "categoryAxis": [
+          {
+            "show": true,
+            "labelColor": {
+              "solid": {
+                "color": "#5C6B79"
+              }
+            },
+            "fontSize": 9,
+            "gridlineShow": false
+          }
+        ],
+        "valueAxis": [
+          {
+            "labelColor": {
+              "solid": {
+                "color": "#5C6B79"
+              }
+            },
+            "fontSize": 9,
+            "gridlineShow": true,
+            "gridlineColor": {
+              "solid": {
+                "color": "#E7E3DC"
+              }
+            }
+          }
+        ],
+        "legend": [
+          {
+            "show": true,
+            "position": "Top",
+            "labelColor": {
+              "solid": {
+                "color": "#5C6B79"
+              }
+            },
+            "fontSize": 9
+          }
+        ]
+      }
+    },
+    "page": {
+      "*": {
+        "background": [
+          {
+            "color": {
+              "solid": {
+                "color": "#FBFBF9"
+              }
+            },
+            "transparency": 0
+          }
+        ]
+      }
+    },
+    "cardVisual": {
+      "*": {
+        "value": [
+          {
+            "fontFamily": "Source Serif 4",
+            "fontSize": 30,
+            "fontColor": {
+              "solid": {
+                "color": "#14293D"
+              }
+            }
+          }
+        ],
+        "referenceLabelTitle": [
+          {
+            "show": true,
+            "titleFontFamily": "Inter",
+            "titleFontSize": 10,
+            "titleFontColor": {
+              "solid": {
+                "color": "#5C6B79"
+              }
+            },
+            "titleBold": false
+          }
+        ],
+        "title": [
+          {
+            "show": false
+          }
+        ]
+      }
+    },
+    "tableEx": {
+      "*": {
+        "columnHeaders": [
+          {
+            "fontColor": {
+              "solid": {
+                "color": "#14293D"
+              }
+            },
+            "backColor": {
+              "solid": {
+                "color": "#FBFBF9"
+              }
+            },
+            "bold": true,
+            "fontSize": 10
+          }
+        ],
+        "values": [
+          {
+            "fontColor": {
+              "solid": {
+                "color": "#14293D"
+              }
+            },
+            "fontSize": 10
+          }
+        ],
+        "grid": [
+          {
+            "gridVertical": false,
+            "gridHorizontal": true,
+            "gridHorizontalColor": {
+              "solid": {
+                "color": "#E7E3DC"
+              }
+            },
+            "rowPadding": 6
+          }
+        ]
+      }
+    }
+  }
+}

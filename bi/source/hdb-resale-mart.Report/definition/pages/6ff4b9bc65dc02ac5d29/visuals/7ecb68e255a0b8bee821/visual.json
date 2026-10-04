@@ -1,0 +1,123 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.13.0/schema.json",
+  "name": "7ecb68e255a0b8bee821",
+  "position": {
+    "x": 32,
+    "y": 673,
+    "z": 2000,
+    "height": 375,
+    "width": 916,
+    "tabOrder": 2000
+  },
+  "visual": {
+    "visualType": "scatterChart",
+    "query": {
+      "queryState": {
+        "Category": {
+          "projections": [
+            {
+              "field": {
+                "Column": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "town_4room_yoy"
+                    }
+                  },
+                  "Property": "town"
+                }
+              },
+              "queryRef": "town_4room_yoy.town",
+              "nativeQueryRef": "town",
+              "active": true
+            }
+          ]
+        },
+        "X": {
+          "projections": [
+            {
+              "field": {
+                "Aggregation": {
+                  "Expression": {
+                    "Column": {
+                      "Expression": {
+                        "SourceRef": {
+                          "Entity": "town_4room_yoy"
+                        }
+                      },
+                      "Property": "n_t1"
+                    }
+                  },
+                  "Function": 0
+                }
+              },
+              "queryRef": "Sum(town_4room_yoy.n_t1)",
+              "nativeQueryRef": "Transactions (Q3 2026)",
+              "active": true,
+              "displayName": "Transactions (Q3 2026)"
+            }
+          ]
+        },
+        "Y": {
+          "projections": [
+            {
+              "field": {
+                "Aggregation": {
+                  "Expression": {
+                    "Column": {
+                      "Expression": {
+                        "SourceRef": {
+                          "Entity": "town_4room_yoy"
+                        }
+                      },
+                      "Property": "med_pct_change"
+                    }
+                  },
+                  "Function": 0
+                }
+              },
+              "queryRef": "Sum(town_4room_yoy.med_pct_change)",
+              "nativeQueryRef": "Change (%, town median)",
+              "displayName": "Change (%, town median)"
+            }
+          ]
+        }
+      }
+    },
+    "drillFilterOtherVisuals": true,
+    "visualContainerObjects": {
+      "title": [
+        {
+          "properties": {
+            "show": {
+              "expr": {
+                "Literal": {
+                  "Value": "true"
+                }
+              }
+            },
+            "text": {
+              "expr": {
+                "Literal": {
+                  "Value": "'Transactions vs price change — one dot per town'"
+                }
+              }
+            }
+          }
+        }
+      ],
+      "general": [
+        {
+          "properties": {
+            "altText": {
+              "expr": {
+                "Literal": {
+                  "Value": "'Scatter chart: resale transaction count against median price change for each town, one dot per town.'"
+                }
+              }
+            }
+          }
+        }
+      ]
+    }
+  }
+}

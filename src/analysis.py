@@ -161,10 +161,19 @@ def main():
                                 median(price_per_sqm) FILTER (WHERE sale_date BETWEEN DATE '{P0[0]}' AND DATE '{P0[1]}')
                          FROM sales WHERE flat_type = '4 ROOM'
                            AND sale_date BETWEEN DATE '{P0[0]}' AND DATE '{P1[1]}'""")[0]
+    if any(v is None for v in nat_med):
+        print("[FAIL] headline requires 4-room transactions in both quarters")
+        print("validation failed — output files NOT written (existing outputs left untouched)")
+        sys.exit(1)
     print(f"national 4-room median price/m2: {nat_med[1]:.0f} -> {nat_med[0]:.0f} "
           f"({100 * (nat_med[0] / nat_med[1] - 1):+.2f}%)")
 
-    d = decomposition(con, P0, P1)
+    try:
+        d = decomposition(con, P0, P1)
+    except ValueError as exc:
+        print(f"[FAIL] {exc}")
+        print("validation failed — output files NOT written (existing outputs left untouched)")
+        sys.exit(1)
     print(f"national decomposition (means): level t0 {d['level_t0']:.2f} | "
           f"total {d['total']:+.2f} | rate {d['rate']:+.2f} | mix {d['mix']:+.2f} | "
           f"interaction {d['inter']:+.2f} S$/m2 | towns {d['towns']}/{d['towns_total']}")
@@ -188,18 +197,6 @@ def main():
         sys.exit(1)
 
     print()
-    print("== headline table (sql/04): 4-room Q3-2026 vs Q3-2025 ==")
-    run_script(con, ROOT / "sql/04_yoy.sql")
-    print("towns in table:", q(con, "SELECT count(*) FROM yoy_4room")[0][0])
-    csv_path = OUT / "town_4room_yoy.csv"
-    print("wrote:", csv_path.as_posix(), f"({csv_path.stat().st_size} bytes)")
-    print("top 6 towns (by Q3-2026 volume):")
-    for r in q(con, """SELECT town, n_t0, n_t1, round(med_t0), round(med_t1),
-                              round(100 * (med_t1 / med_t0 - 1), 1)
-                       FROM yoy_4room ORDER BY n_t1 DESC LIMIT 6"""):
-        print(f"   {r[0]:<15} n {r[1]}->{r[2]} · median {r[3]}->{r[4]} S$/m2 ({r[5]:+.1f}%)")
-
-    print()
     print("== sensitivity (C5): windows + threshold variants ==")
     variants = [
         ("q3 (base)", P0, P1, 0),
@@ -211,7 +208,12 @@ def main():
     ]
     srows = []
     for label, a, b, mn in variants:
-        d = decomposition(con, a, b, mn)
+        try:
+            d = decomposition(con, a, b, mn)
+        except ValueError as exc:
+            print(f"[FAIL] {label}: {exc}")
+            print("validation failed — output files NOT written (existing outputs left untouched)")
+            sys.exit(1)
         pct = 100 * d["total"] / d["level_t0"]
         srows.append({
             "variant": label,
@@ -227,9 +229,21 @@ def main():
         drop = f" ({d['towns_dropped']} dropped)" if d["towns_dropped"] else ""
         print(f"   {label:<20} towns {d['towns']:>2}{drop} · total {pct:+.2f}% · "
               f"rate {d['rate']:+.1f} / mix {d['mix']:+.1f} / inter {d['inter']:+.1f} S$/m2")
+    print()
+    print("== headline table (sql/04): 4-room Q3-2026 vs Q3-2025 ==")
+    run_script(con, ROOT / "sql/04_yoy.sql")
+    print("towns in table:", q(con, "SELECT count(*) FROM yoy_4room")[0][0])
+    csv_path = OUT / "town_4room_yoy.csv"
+    print("wrote:", csv_path.as_posix(), f"({csv_path.stat().st_size} bytes)")
+    print("top 6 towns (by Q3-2026 volume):")
+    for r in q(con, """SELECT town, n_t0, n_t1, round(med_t0), round(med_t1),
+                              round(100 * (med_t1 / med_t0 - 1), 1)
+                       FROM yoy_4room ORDER BY n_t1 DESC LIMIT 6"""):
+        print(f"   {r[0]:<15} n {r[1]}->{r[2]} · median {r[3]}->{r[4]} S$/m2 ({r[5]:+.1f}%)")
+
     sens_path = OUT / "sensitivity.csv"
     with sens_path.open("w", newline="", encoding="utf-8") as f:
-        wcsv = csv.DictWriter(f, fieldnames=list(srows[0].keys()))
+        wcsv = csv.DictWriter(f, fieldnames=list(srows[0].keys()), lineterminator="\n")
         wcsv.writeheader()
         wcsv.writerows(srows)
     print("wrote:", sens_path.as_posix(), f"({sens_path.stat().st_size} bytes)")

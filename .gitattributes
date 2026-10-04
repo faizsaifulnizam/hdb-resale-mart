@@ -1,0 +1,2 @@
+# Published pipeline CSVs must have identical bytes on Windows and Linux.
+outputs/*.csv text eol=lf

@@ -1,7 +1,8 @@
 -- 05_checks.sql — validation queries for the staged `sales` table.
 -- Each row: one check. src/build_dataset.py runs this and asserts all violations = 0.
 
-SELECT 'price > 0'            AS check_name, count(*) AS violations FROM sales WHERE resale_price <= 0
+SELECT 'sales not empty'      AS check_name, CASE WHEN count(*) = 0 THEN 1 ELSE 0 END AS violations FROM sales
+UNION ALL SELECT 'price > 0',         count(*) FROM sales WHERE resale_price <= 0
 UNION ALL SELECT 'area > 0',           count(*) FROM sales WHERE floor_area_sqm <= 0
 UNION ALL SELECT 'date in range',      count(*) FROM sales WHERE sale_date < DATE '2017-01-01' OR sale_date > CURRENT_DATE
 UNION ALL SELECT 'town not null',      count(*) FROM sales WHERE town IS NULL OR town = ''

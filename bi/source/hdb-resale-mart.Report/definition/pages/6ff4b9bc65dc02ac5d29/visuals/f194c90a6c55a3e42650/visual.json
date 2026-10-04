@@ -1,0 +1,161 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.13.0/schema.json",
+  "name": "f194c90a6c55a3e42650",
+  "position": {
+    "x": 972,
+    "y": 274,
+    "z": 1000,
+    "height": 375,
+    "width": 916,
+    "tabOrder": 1000
+  },
+  "visual": {
+    "visualType": "clusteredColumnChart",
+    "query": {
+      "queryState": {
+        "Category": {
+          "projections": [
+            {
+              "field": {
+                "Column": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "town_4room_yoy"
+                    }
+                  },
+                  "Property": "town"
+                }
+              },
+              "queryRef": "town_4room_yoy.town",
+              "nativeQueryRef": "town",
+              "active": true
+            }
+          ]
+        },
+        "Y": {
+          "projections": [
+            {
+              "field": {
+                "Aggregation": {
+                  "Expression": {
+                    "Column": {
+                      "Expression": {
+                        "SourceRef": {
+                          "Entity": "town_4room_yoy"
+                        }
+                      },
+                      "Property": "rate_effect"
+                    }
+                  },
+                  "Function": 0
+                }
+              },
+              "queryRef": "Sum(town_4room_yoy.rate_effect)",
+              "nativeQueryRef": "Rate (S$/m²)",
+              "displayName": "Rate (S$/m²)"
+            },
+            {
+              "field": {
+                "Aggregation": {
+                  "Expression": {
+                    "Column": {
+                      "Expression": {
+                        "SourceRef": {
+                          "Entity": "town_4room_yoy"
+                        }
+                      },
+                      "Property": "mix_effect"
+                    }
+                  },
+                  "Function": 0
+                }
+              },
+              "queryRef": "Sum(town_4room_yoy.mix_effect)",
+              "nativeQueryRef": "Mix (S$/m²)",
+              "displayName": "Mix (S$/m²)"
+            },
+            {
+              "field": {
+                "Aggregation": {
+                  "Expression": {
+                    "Column": {
+                      "Expression": {
+                        "SourceRef": {
+                          "Entity": "town_4room_yoy"
+                        }
+                      },
+                      "Property": "interaction"
+                    }
+                  },
+                  "Function": 0
+                }
+              },
+              "queryRef": "Sum(town_4room_yoy.interaction)",
+              "nativeQueryRef": "Interaction (S$/m²)",
+              "displayName": "Interaction (S$/m²)"
+            }
+          ]
+        }
+      },
+      "sortDefinition": {
+        "sort": [
+          {
+            "field": {
+              "Aggregation": {
+                "Expression": {
+                  "Column": {
+                    "Expression": {
+                      "SourceRef": {
+                        "Entity": "town_4room_yoy"
+                      }
+                    },
+                    "Property": "rate_effect"
+                  }
+                },
+                "Function": 0
+              }
+            },
+            "direction": "Descending"
+          }
+        ],
+        "isDefaultSort": true
+      }
+    },
+    "drillFilterOtherVisuals": true,
+    "visualContainerObjects": {
+      "title": [
+        {
+          "properties": {
+            "show": {
+              "expr": {
+                "Literal": {
+                  "Value": "true"
+                }
+              }
+            },
+            "text": {
+              "expr": {
+                "Literal": {
+                  "Value": "'What moved it — rate, mix, and interaction by town'"
+                }
+              }
+            }
+          }
+        }
+      ],
+      "general": [
+        {
+          "properties": {
+            "altText": {
+              "expr": {
+                "Literal": {
+                  "Value": "'Clustered column chart: shift-share decomposition by town - rate effect, mix effect, and interaction, in dollars per square metre.'"
+                }
+              }
+            }
+          }
+        }
+      ]
+    }
+  }
+}

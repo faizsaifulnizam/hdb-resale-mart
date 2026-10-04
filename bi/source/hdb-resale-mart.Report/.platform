@@ -1,0 +1,11 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/gitIntegration/platformProperties/2.0.0/schema.json",
+  "metadata": {
+    "type": "Report",
+    "displayName": "hdb-resale-mart"
+  },
+  "config": {
+    "version": "2.0",
+    "logicalId": "04b7fafb-a611-457c-b484-c697c9d8537e"
+  }
+}

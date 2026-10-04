@@ -114,7 +114,8 @@ def fig1_dumbbell(con):
     ax.scatter([], [], s=36, color=T["teal"], label="Q3 2026 — higher")
     ax.scatter([], [], s=36, color=T["burnt"], label="Q3 2026 — lower")
     ax.legend()
-    foot(fig, f"4-room · towns with ≥25 transactions in each quarter (3 excluded) · {SRC}")
+    excluded = q(con, "SELECT count(*) FROM yoy_4room")[0][0] - len(rows)
+    foot(fig, f"4-room · towns with ≥25 transactions in each quarter ({excluded} excluded) · {SRC}")
     print(f"F1: {len(rows)} towns shown · lower in {n_down}")
     save(fig, "f1_town_dumbbell.png")
 
@@ -209,10 +210,12 @@ def fig3_mix(con):
 
 def fig4_waterfall(con, d):
     labels = ["Rate\n(within towns)", "Mix\n(town shares)", "Interaction", "Total"]
-    deltas = [("rate", d["rate"], T["burnt"]), ("mix", d["mix"], T["burnt"]), ("inter", d["inter"], T["teal"])]
+    deltas = [(key, d[key], T["teal"] if d[key] >= 0 else T["burnt"])
+              for key in ("rate", "mix", "inter")]
 
     fig, ax = plt.subplots()
     cum = 0.0
+    endpoints = [0, d["total"]]
     xs = [0, 1, 2, 3]
     for i, (key, val, color) in enumerate(deltas):
         ax.bar(xs[i], abs(val), bottom=min(cum, cum + val), color=color, width=0.6, zorder=3)
@@ -222,17 +225,19 @@ def fig4_waterfall(con, d):
         if i < len(deltas) - 1:
             ax.plot([xs[i] + 0.3, xs[i + 1] - 0.3], [cum + val, cum + val], color=T["light"], lw=0.9, ls="--", zorder=2)
         cum += val
+        endpoints.append(cum)
     ax.bar(xs[3], abs(d["total"]), bottom=min(0, d["total"]), color=T["ink"], width=0.6, zorder=3)
-    ax.annotate(f"{d['total']:+.1f}", (xs[3], d["total"]), xytext=(0, -14),
-                textcoords="offset points", ha="center", va="top", fontsize=9, color=T["ink"])
+    ax.annotate(f"{d['total']:+.1f}", (xs[3], d["total"]),
+                xytext=(0, 8 if d["total"] >= 0 else -14), textcoords="offset points",
+                ha="center", va="bottom" if d["total"] >= 0 else "top", fontsize=9, color=T["ink"])
     ax.axhline(0, color=T["muted"], lw=0.9, zorder=1)
     ax.set_xticks(xs)
     ax.set_xticklabels(labels)
-    ax.set_ylim(min(cum, d["total"]) - 28, 34)
+    ax.set_ylim(min(endpoints) - 28, max(endpoints) + 34)
     ax.yaxis.grid(True)
     ax.xaxis.grid(False)
     ax.set_ylabel("S$/m² contribution")
-    ax.set_title(f"Rate, not mix — the {d['total']:+.1f} S$/m² move decomposes within towns")
+    ax.set_title(f"Town-price and town-share terms — {d['total']:+.1f} S$/m² in Q3")
     foot(fig, f"Shift-share on quarterly means · level {d['level_t0']:,.1f} → {d['level_t0'] + d['total']:,.1f} S$/m² · {SRC}")
     print(f"F4: rate {d['rate']:+.2f} · mix {d['mix']:+.2f} · inter {d['inter']:+.2f} · total {d['total']:+.2f}")
     save(fig, "f4_waterfall.png")
