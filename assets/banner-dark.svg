@@ -1,13 +1,13 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="320" viewBox="0 0 1280 320" role="img" aria-label="hdb-resale-mart — 4-room resale price per m2 by town, Q3 2025 to Q3 2026: a six-repo series on Singapore's public data">
+<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="320" viewBox="0 0 1280 320" role="img" aria-label="hdb-resale-mart — 4-room resale price per m2, Q3 2025 to Q3 2026: six sample towns; full chart has 16 of 23 lower and 7 higher. A six-repo series on Singapore's public data">
   <rect width="1280" height="320" fill="#14293D"/>
   <title>hdb-resale-mart — a six-repo series on Singapore's public data</title>
   <text x="72" y="118" font-family="Georgia, 'Source Serif 4', serif" font-size="58" fill="#F3F0EA">hdb-resale-mart</text>
   <rect x="72" y="146" width="420" height="4" fill="#3F8FB3"/>
-  <text x="72" y="196" font-family="Inter, 'Helvetica Neue', Arial, sans-serif" font-size="20" fill="#A9B6C1">After 2023, did 4-room resale prices rise because</text>
-  <text x="72" y="222" font-family="Inter, 'Helvetica Neue', Arial, sans-serif" font-size="20" fill="#A9B6C1">flats got more expensive per square metre — or</text>
-  <text x="72" y="248" font-family="Inter, 'Helvetica Neue', Arial, sans-serif" font-size="20" fill="#A9B6C1">because the mix of towns and flat sizes sold</text>
-  <text x="72" y="274" font-family="Inter, 'Helvetica Neue', Arial, sans-serif" font-size="20" fill="#A9B6C1">changed?</text>
-  <text x="72" y="306" font-family="Inter, 'Helvetica Neue', Arial, sans-serif" font-size="16" fill="#8B98A5">Median price per m² · 2025 <tspan fill="#8B98A5">●</tspan> → 2026: <tspan fill="#D97E4F">●</tspan> lower <tspan fill="#45A08B">●</tspan> higher · 6 of 23 shown towns</text>
+  <text x="72" y="196" font-family="Inter, 'Helvetica Neue', Arial, sans-serif" font-size="20" fill="#A9B6C1">After 2023, did 4-room resale prices per m² move</text>
+  <text x="72" y="222" font-family="Inter, 'Helvetica Neue', Arial, sans-serif" font-size="20" fill="#A9B6C1">because town-average prices changed — or</text>
+  <text x="72" y="248" font-family="Inter, 'Helvetica Neue', Arial, sans-serif" font-size="20" fill="#A9B6C1">because sales shifted across towns?</text>
+
+  <text x="72" y="306" font-family="Inter, 'Helvetica Neue', Arial, sans-serif" font-size="16" fill="#A9B6C1">Q3 median S$/m² · 2025 <tspan fill="#8B98A5">●</tspan> → 2026: <tspan fill="#D97E4F">●</tspan> lower <tspan fill="#45A08B">●</tspan> higher · Sample of 6 towns; full chart: 16 of 23 lower, 7 higher</text>
   <line x1="830.9" y1="72" x2="804.2" y2="72" stroke="#2C4358" stroke-width="3"/>
   <circle cx="830.9" cy="72" r="6" fill="#8B98A5"/>
   <circle cx="804.2" cy="72" r="8" fill="#D97E4F"/>

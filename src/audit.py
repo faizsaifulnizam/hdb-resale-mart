@@ -57,7 +57,7 @@ def main():
     print("lease text samples:", q(con, "SELECT DISTINCT remaining_lease FROM raw LIMIT 8")[:8])
 
     print()
-    d = q(con, "SELECT sum(c - 1) FROM (SELECT count(*) AS c FROM raw GROUP BY ALL) WHERE c > 1")[0][0]
+    d = q(con, "SELECT sum(c - 1) FROM (SELECT *, count(*) AS c FROM raw GROUP BY ALL) WHERE c > 1")[0][0]
     print("duplicate rows (extra copies):", d or 0)
 
     print()

@@ -10,17 +10,26 @@ permissions:
 
 jobs:
   smoke:
-    name: smoke tests
+    name: pipeline and artifact tests
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
 
-      - uses: actions/setup-python@v7
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7
         with:
           python-version: "3.12"
 
-      - name: Compile sources
-        run: python -m compileall -q src
+      - name: Install existing pinned pipeline dependencies
+        run: python -m pip install -r requirements.txt
+
+      - name: Compile sources and tests
+        run: python -m compileall -q src tests
+
+      - name: Exercise numerical pipeline, regressions and figures (no API)
+        run: python -m unittest discover -s tests -p 'test_*.py' -v
 
       - name: Check committed outputs and figures
         run: python tests/smoke_test.py
+
+      - name: Check Power BI source contracts
+        run: python bi/check_report.py

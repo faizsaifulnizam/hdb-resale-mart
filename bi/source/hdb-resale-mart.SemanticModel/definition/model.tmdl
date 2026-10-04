@@ -1,0 +1,19 @@
+model Model
+	culture: en-SG
+	defaultPowerBIDataSourceVersion: powerBI_V3
+	sourceQueryCulture: en-SG
+	valueFilterBehavior: independent
+	dataAccessOptions
+		legacyRedirects
+		returnErrorValuesAsNull
+
+annotation __PBI_TimeIntelligenceEnabled = 1
+
+annotation PBI_QueryOrder = ["town_4room_yoy"]
+
+annotation PBI_ProTooling = ["DevMode"]
+
+ref table town_4room_yoy
+
+ref cultureInfo en-SG
+

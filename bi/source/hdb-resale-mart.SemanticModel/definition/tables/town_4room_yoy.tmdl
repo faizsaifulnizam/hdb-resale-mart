@@ -1,0 +1,150 @@
+table town_4room_yoy
+	lineageTag: aa038322-8057-45e1-8f3d-b7bdb59e676b
+
+	measure 'Resales KPI' =
+			VAR CurrentSales = SUM(town_4room_yoy[n_t1])
+			VAR PriorSales = SUM(town_4room_yoy[n_t0])
+			VAR Change = DIVIDE(CurrentSales - PriorSales, PriorSales)
+			RETURN FORMAT(CurrentSales, "#,0") & " · " & IF(ISBLANK(Change), "YoY unavailable", FORMAT(Change, "+0.0%;-0.0%;0.0%"))
+
+	measure 'Resales Alt Text' =
+			"4-room resales, Q3 2026 vs Q3 2025: " & [Resales KPI] & "; Q3 2025 sales: " & FORMAT(SUM(town_4room_yoy[n_t0]), "#,0") & ". Percentage is change in sales count, not price."
+
+	column town
+		dataType: string
+		lineageTag: e80953e8-0380-4873-905e-bb790fce5a12
+		summarizeBy: none
+		sourceColumn: town
+
+		annotation SummarizationSetBy = Automatic
+
+	column n_t0
+		dataType: int64
+		formatString: 0
+		lineageTag: af7a7bfb-21e5-45a5-bdae-92715fa5d19a
+		summarizeBy: sum
+		sourceColumn: n_t0
+
+		annotation SummarizationSetBy = Automatic
+
+	column n_t1
+		dataType: int64
+		formatString: 0
+		lineageTag: a20f60e5-3974-4e7f-9204-e65dea3cccd4
+		summarizeBy: sum
+		sourceColumn: n_t1
+
+		annotation SummarizationSetBy = Automatic
+
+	column med_ppsm_2025q3
+		dataType: double
+		lineageTag: cdaf40d1-7816-4b2f-9322-04278037cdb4
+		summarizeBy: sum
+		sourceColumn: med_ppsm_2025q3
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column med_ppsm_2026q3
+		dataType: double
+		lineageTag: 0f1a699b-3cf6-4d0a-89ff-9a4d92c031bb
+		summarizeBy: sum
+		sourceColumn: med_ppsm_2026q3
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column med_pct_change
+		dataType: double
+		lineageTag: b6895d52-e117-4e7d-b3a2-745c7fac32fc
+		summarizeBy: sum
+		sourceColumn: med_pct_change
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column mean_ppsm_2025q3
+		dataType: double
+		lineageTag: 2fe8b744-3c59-493e-913f-7852cf19b406
+		summarizeBy: sum
+		sourceColumn: mean_ppsm_2025q3
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column mean_ppsm_2026q3
+		dataType: double
+		lineageTag: f25c7e64-45ad-44f0-b995-0c5b3aad5e43
+		summarizeBy: sum
+		sourceColumn: mean_ppsm_2026q3
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column share_2025q3
+		dataType: double
+		lineageTag: 184fecba-ce18-48ae-9345-0f1d7e9d8f2f
+		summarizeBy: sum
+		sourceColumn: share_2025q3
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column share_2026q3
+		dataType: double
+		lineageTag: 3c7ddf38-abf2-47c2-b6c2-67d7a7eae803
+		summarizeBy: sum
+		sourceColumn: share_2026q3
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column rate_effect
+		dataType: double
+		lineageTag: b6767955-eacf-4617-9101-a05d8400519c
+		summarizeBy: sum
+		sourceColumn: rate_effect
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column mix_effect
+		dataType: double
+		lineageTag: a42cea8d-0ad3-422b-a881-b1df9f9d0254
+		summarizeBy: sum
+		sourceColumn: mix_effect
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column interaction
+		dataType: double
+		lineageTag: 53cf75fb-31d4-4888-861f-8d625f30c237
+		summarizeBy: sum
+		sourceColumn: interaction
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	partition town_4room_yoy = m
+		mode: import
+		source =
+				let
+				    Source = Csv.Document(File.Contents("REPLACE_WITH_ABSOLUTE_PATH_TO_OUTPUTS/town_4room_yoy.csv"),[Delimiter=",", Columns=13, Encoding=1252, QuoteStyle=QuoteStyle.None]),
+				    #"Promoted Headers" = Table.PromoteHeaders(Source, [PromoteAllScalars=true]),
+				    #"Changed Type" = Table.TransformColumnTypes(#"Promoted Headers",{{"town", type text}, {"n_t0", Int64.Type}, {"n_t1", Int64.Type}, {"med_ppsm_2025q3", type number}, {"med_ppsm_2026q3", type number}, {"med_pct_change", type number}, {"mean_ppsm_2025q3", type number}, {"mean_ppsm_2026q3", type number}, {"share_2025q3", type number}, {"share_2026q3", type number}, {"rate_effect", type number}, {"mix_effect", type number}, {"interaction", type number}})
+				in
+				    #"Changed Type"
+
+	annotation PBI_ResultType = Table
+

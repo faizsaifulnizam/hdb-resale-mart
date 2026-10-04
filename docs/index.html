@@ -6,7 +6,7 @@
 <title>hdb-resale-mart — Rate or mix? Singapore's 4-room HDB resale prices</title>
 <meta name="description" content="Did 4-room resale prices move because flats got more expensive per m² — or because the mix of towns sold changed? A reproducible DuckDB + Power BI analysis of Singapore HDB resale data (Q3 2026 vs Q3 2025).">
 <meta property="og:title" content="hdb-resale-mart — Rate or mix?">
-<meta property="og:description" content="A reproducible analysis of Singapore's 4-room HDB resale prices: the Q3 2026 move is within-town, not mix.">
+<meta property="og:description" content="4-room median price/m² dipped 1.3% in Q3 2026 vs Q3 2025. Town-share mix nets near zero; within-town composition remains in the rate term.">
 <meta property="og:type" content="website">
 <meta property="og:image" content="https://faizsaifulnizam.github.io/hdb-resale-mart/img/social-card.png">
 <meta property="og:image:width" content="1280">
@@ -59,13 +59,13 @@ footer{border-top:1px solid var(--rule);margin-top:60px;padding-top:18px;color:v
 </picture>
 </div>
 
-<p class="lead">4-room resale price per m² dipped in Q3 2026 vs a year earlier: <b>−1.3%</b> on the headline median (S$6,647 → <b>S$6,559/m²</b>) and <b>−0.6%</b> on the mean basis used for the decomposition — both point the same way. The move is <b>within-town, not mix</b>. A small dip; a rate story; one quarter.</p>
+<p class="lead">4-room resale price per m² dipped in Q3 2026 vs a year earlier: <b>−1.3%</b> on the headline median (S$6,647 → <b>S$6,559/m²</b>) and <b>−0.6%</b> on the mean basis used for the decomposition — both point the same way. Town-share mix nets to ≈0: rate <b>−53.3 S$/m²</b>, mix <b>−0.7</b>, interaction <b>+13.3</b>. “Rate” still includes what sold within each town: <b>Central Area (23 sales in each quarter) contributes −16.4 of that −53.3</b>, coinciding with fewer Cantonment Road Type S1 sales (15 → 8). Restricting the split to towns with ≥25 sales in each quarter moves the rate to <b>−38.5</b>. A small dip; not a like-for-like flat-price estimate; one quarter.</p>
 
 <div class="stats">
   <div class="stat"><div class="n">−1.32%</div><div class="l">national 4-room median price/m², Q3 2026 vs Q3 2025 (S$6,647 → 6,559)</div></div>
   <div class="stat"><div class="n">16 of 23</div><div class="l">shown towns lower — Queenstown +10.9% to Bukit Batok −6.3% (towns need ≥25 sales in each quarter to appear)</div></div>
   <div class="stat"><div class="n">rate −53.3 · mix −0.7</div><div class="l">S$/m², transaction-weighted means — interaction +13.3 reported separately, not folded in</div></div>
-  <div class="stat"><div class="n">−0.6% … +1.0%</div><div class="l">the total across 3/6/12-month windows — small under every variant</div></div>
+  <div class="stat"><div class="n">−0.6% … +1.0%</div><div class="l">the total across 3/6/12-month windows — small, but the sign changes (12 months: +0.987%)</div></div>
 </div>
 
 <div class="fig">
@@ -73,14 +73,14 @@ footer{border-top:1px solid var(--rule);margin-top:60px;padding-top:18px;color:v
 <source media="(prefers-color-scheme: dark)" srcset="img/f1_town_dumbbell-dark.png">
 <img src="img/f1_town_dumbbell.png" alt="4-room median price per m² by town — Q3 2026 vs Q3 2025">
 </picture>
-<figcaption>Median price/m² by town — Q3 2026 (green) vs Q3 2025 (grey). Every town is in the CSV; charts show towns with ≥25 sales in each quarter.</figcaption>
+<figcaption>Median price/m² by town — Q3 2025 in grey; Q3 2026 in teal if higher and burnt orange if lower. Every town is in the CSV; charts show towns with ≥25 sales in each quarter.</figcaption>
 </div>
 
 <h2>More views</h2>
 <div class="grid3">
   <figure class="fig">
   <picture><source media="(prefers-color-scheme: dark)" srcset="img/f2_rolling_median-dark.png"><img src="img/f2_rolling_median.png" alt="Rolling 3-month medians of town price per m²"></picture>
-  <figcaption>Rolling 3-month medians, 2023–2026</figcaption>
+  <figcaption>Median of the last three monthly medians, 2023–2026 — not pooled sales</figcaption>
   </figure>
   <figure class="fig">
   <picture><source media="(prefers-color-scheme: dark)" srcset="img/f3_mix_drift-dark.png"><img src="img/f3_mix_drift.png" alt="Town-mix drift over the sample"></picture>
@@ -103,24 +103,32 @@ footer{border-top:1px solid var(--rule);margin-top:60px;padding-top:18px;color:v
 
 <h2>Method</h2>
 <ol class="method">
-<li><b>Pull</b> — HDB resale flat prices from data.gov.sg (241,822 rows × 11 columns at the 2026-10-02 pull; the raw file is never edited). <a href="https://github.com/faizsaifulnizam/hdb-resale-mart/blob/main/src/download.py">src/download.py</a></li>
+<li><b>Pull</b> — HDB resale flat prices from data.gov.sg (241,822 rows × 11 columns in the historical 2026-10-02 snapshot; manifest time is a file-modification-time proxy, not a direct download receipt; the raw file is never edited). <a href="https://github.com/faizsaifulnizam/hdb-resale-mart/blob/main/src/download.py">src/download.py</a></li>
 <li><b>Audit</b> — profile the data first; rules are set before any analysis. <a href="https://github.com/faizsaifulnizam/hdb-resale-mart/blob/main/docs/data_audit.md">docs/data_audit.md</a></li>
-<li><b>Stage &amp; check</b> — parse and clean with every exclusion counted; 7 assertions fail loudly. <a href="https://github.com/faizsaifulnizam/hdb-resale-mart/blob/main/sql/01_staging.sql">sql/01</a> · <a href="https://github.com/faizsaifulnizam/hdb-resale-mart/blob/main/sql/05_checks.sql">sql/05</a></li>
-<li><b>Measure &amp; decompose</b> — town×month medians, then a shift-share split of the per-m² move into rate / mix / interaction (on means — medians are not additive). <a href="https://github.com/faizsaifulnizam/hdb-resale-mart/blob/main/sql/03_metrics.sql">sql/03</a> · <a href="https://github.com/faizsaifulnizam/hdb-resale-mart/blob/main/sql/04_yoy.sql">sql/04</a></li>
+<li><b>Stage &amp; check</b> — parse and clean with every exclusion counted; 8 assertions, including non-empty staged data, fail loudly. <a href="https://github.com/faizsaifulnizam/hdb-resale-mart/blob/main/sql/01_staging.sql">sql/01</a> · <a href="https://github.com/faizsaifulnizam/hdb-resale-mart/blob/main/sql/05_checks.sql">sql/05</a></li>
+<li><b>Measure &amp; decompose</b> — town×month medians and a rolling median of the last three monthly medians (not all sales pooled; missing months supply no median), then a shift-share split of the per-m² move into rate / mix / interaction (on means — medians are not additive). <a href="https://github.com/faizsaifulnizam/hdb-resale-mart/blob/main/sql/03_metrics.sql">sql/03</a> · <a href="https://github.com/faizsaifulnizam/hdb-resale-mart/blob/main/sql/04_yoy.sql">sql/04</a></li>
 <li><b>Draw, write, present</b> — figures are code, in light and dark (<a href="https://github.com/faizsaifulnizam/hdb-resale-mart/blob/main/src/figures.py">src/figures.py</a>); then the <a href="https://github.com/faizsaifulnizam/hdb-resale-mart/blob/main/docs/decision_memo.md">decision memo</a> and the Power BI page.</li>
 </ol>
 
 <h2>Reproduce</h2>
+<p>Requires <a href="https://docs.astral.sh/uv/">uv</a>. Run in Bash (Linux/macOS or Git Bash on Windows):</p>
 <pre><code>git clone https://github.com/faizsaifulnizam/hdb-resale-mart &amp;&amp; cd hdb-resale-mart
 uv venv .venv --python 3.12          # or: python -m venv .venv
-source .venv/bin/activate            # Windows: .venv\Scripts\activate
+if [ -f .venv/Scripts/activate ]; then
+  source .venv/Scripts/activate      # Windows Git Bash
+else
+  source .venv/bin/activate          # Linux / macOS
+fi
 uv pip install -r requirements.txt   # or: pip install -r requirements.txt
 
 python src/download.py       # raw CSV → data/raw/ (gitignored)
-python src/build_dataset.py  # staging + 7 checks → data/processed/sales.parquet
+python src/build_dataset.py  # staging + 8 checks → data/processed/sales.parquet
 python src/analysis.py       # medians, YoY, decomposition, sensitivity → outputs/
 python src/figures.py        # re-renders reports/figures/</code></pre>
 <p class="cap">Then check <code>outputs/town_4room_yoy.csv</code>: Queenstown reads 10,666.67 → 11,833.33, and the national medians match the headline. Data as of the 2026-10-02 pull — a later re-pull can move the newest months.</p>
+
+<h2>Limits</h2>
+<p>4-room flats only; price is normalized by floor area, but flat-size mix is not decomposed. The split uses means, not medians, and does not reconstruct the official HDB price index. Town-average “rate” still includes block, storey, lease and model composition; the Central Area sales pattern is descriptive, not causal proof. All 26 towns remain in the national split; only the chart suppresses the three below-threshold towns. Registrations can revise; this is not a forecast.</p>
 
 <h2>Read more</h2>
 <ul>
@@ -130,6 +138,7 @@ python src/figures.py        # re-renders reports/figures/</code></pre>
 </ul>
 
 <footer>
+<p>Six-repo series: <a href="https://github.com/faizsaifulnizam/hdb-resale-mart">hdb-resale-mart</a> · <a href="https://github.com/faizsaifulnizam/card-book-quality">card-book-quality</a> · <a href="https://github.com/faizsaifulnizam/coe-quota-premium">coe-quota-premium</a> · <a href="https://github.com/faizsaifulnizam/retail-sales-split">retail-sales-split</a> · <a href="https://github.com/faizsaifulnizam/coe-category-break">coe-category-break</a> · <a href="https://github.com/faizsaifulnizam/hdb-lease-slope">hdb-lease-slope</a>.</p>
 <p>An independent, unofficial analysis by <a href="https://github.com/faizsaifulnizam">Muhammad Faiz Saifulnizam</a>. Data: HDB resale flat prices via <a href="https://data.gov.sg/datasets/d_8b84c4ee58e3cfc0ece0d773c8ca6abc/view">data.gov.sg</a> — Singapore Open Data Licence. Code: MIT. Not a forecast; not causal advice.</p>
 </footer>
 
