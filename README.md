@@ -12,6 +12,8 @@
 
 **Status:** built 2026-10-02. Part of a six-repo series on Singapore's public data.
 
+**Intended use:** For a housing-market analyst, this brief puts the headline move in context before drawing local conclusions, so read the sales composition and time-window sensitivity alongside it. It is not a buy or sell recommendation, and a national or town average is not a like-for-like flat-price change.
+
 ## Key numbers (all reproducible)
 
 - **Headline:** national 4-room median price/m² 6,647 → 6,559 (**−1.32%**, medians) · **−0.57%** on the mean basis that the split uses; Q3 2026 vs Q3 2025.
