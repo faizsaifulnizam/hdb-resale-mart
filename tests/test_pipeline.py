@@ -51,7 +51,7 @@ class PipelineTest(unittest.TestCase):
         self.temp = tempfile.TemporaryDirectory(prefix="hdb-pipeline-")
         self.addCleanup(self.temp.cleanup)
         self.root = Path(self.temp.name)
-        for directory in ("src", "sql"):
+        for directory in ("src", "sql", "assets"):
             shutil.copytree(ROOT / directory, self.root / directory,
                             ignore=shutil.ignore_patterns("__pycache__"))
         for directory in ("data/raw", "data/processed", "outputs"):
@@ -226,6 +226,82 @@ class PipelineTest(unittest.TestCase):
                 self.assertTrue(data.endswith(b"\n"))
         self.assert_success(self.run_cli("analysis.py"))
         self.assertEqual(first, [p.read_bytes() for p in paths])
+
+    def test_every_window_rejects_missing_national_month(self):
+        for month in ('2025-04', '2026-08', '2024-10'):
+            with self.subTest(month=month):
+                self.write_raw([r for r in fixture_rows() if r['month'] != month])
+                self.assert_success(self.run_cli('build_dataset.py'))
+                self.seed_outputs()
+                self.assert_validation_failure(self.run_cli('analysis.py'))
+
+    def test_direct_parquet_nonfinite_sensitivity_preserves_outputs(self):
+        for month in ('2025-04-01', '2025-07-01', '2026-07-01'):
+            with self.subTest(month=month):
+                self.write_raw(fixture_rows())
+                self.assert_success(self.run_cli('build_dataset.py'))
+                with duckdb.connect() as con:
+                    con.read_parquet(str(self.parquet)).create_view('original')
+                    con.execute("CREATE TABLE altered AS SELECT * REPLACE (CASE WHEN sale_month = CAST(? AS DATE) THEN 'NaN'::DOUBLE ELSE price_per_sqm END AS price_per_sqm) FROM original", [month])
+                    con.sql('SELECT * FROM altered').write_parquet(str(self.parquet))
+                self.seed_outputs()
+                self.assert_validation_failure(self.run_cli('analysis.py'))
+
+    def test_raw_nonfinite_preserves_parquet(self):
+        for column in ('resale_price', 'floor_area_sqm'):
+            for value in ('NaN', 'Infinity', '-Infinity'):
+                with self.subTest(column=column, value=value):
+                    self.write_raw(fixture_rows() + [sale(**{column: value})])
+                    self.parquet.write_bytes(b'previous generation')
+                    result = self.run_cli('build_dataset.py')
+                    self.assertNotEqual(result.returncode, 0)
+                    self.assertEqual(self.parquet.read_bytes(), b'previous generation')
+
+    def test_duplicate_header_preserves_parquet(self):
+        self.raw.write_text(','.join(FIELDS + ['resale_price']) + '\n' + ','.join(sale().values()) + ',500000\n')
+        self.parquet.write_bytes(b'previous generation')
+        result = self.run_cli('build_dataset.py')
+        self.assertNotEqual(result.returncode, 0)
+        self.assertEqual(self.parquet.read_bytes(), b'previous generation')
+
+    def test_apostrophe_checkout_all_dataset_consumers(self):
+        renamed = self.root.with_name(self.root.name + "-O'Brien-é")
+        self.root.rename(renamed)
+        self.addCleanup(shutil.rmtree, renamed)
+        self.root = renamed
+        self.raw = self.root / 'data/raw/hdb-resale-prices-2017-onwards.csv'
+        self.parquet = self.root / 'data/processed/sales.parquet'
+        self.write_raw(fixture_rows())
+        self.assert_success(self.run_cli('build_dataset.py'))
+        self.assert_success(self.run_cli('analysis.py'))
+        self.assert_success(self.run_cli('audit.py'))
+        self.assert_success(self.run_cli('figures.py'))
+
+    def test_figures_do_not_publish_analysis_csvs(self):
+        self.write_raw(fixture_rows())
+        self.assert_success(self.run_cli('build_dataset.py'))
+        self.seed_outputs()
+        result = self.run_cli('figures.py')
+        self.assert_success(result)
+        for name in ('town_4room_yoy.csv', 'sensitivity.csv'):
+            self.assertEqual((self.root / 'outputs' / name).read_bytes(), b'old CSV sentinel\n')
+
+    def test_sensitivity_requires_full_town_coverage_without_threshold(self):
+        rows = fixture_rows()
+        for row in rows:
+            if row['month'] == '2025-04': row['town'] = 'ONLY PRIOR'
+        self.write_raw(rows)
+        self.assert_success(self.run_cli('build_dataset.py'))
+        self.seed_outputs()
+        self.assert_validation_failure(self.run_cli('analysis.py'))
+
+    def test_builder_rejects_stale_manifest(self):
+        import json
+        self.write_raw(fixture_rows())
+        (self.raw.parent / 'pull_manifest.json').write_text(json.dumps({'sha256':'0'*64}))
+        self.parquet.write_bytes(b'previous generation')
+        self.assertNotEqual(self.run_cli('build_dataset.py').returncode, 0)
+        self.assertEqual(self.parquet.read_bytes(), b'previous generation')
 
     def test_empty_staging_preserves_parquet(self):
         for changes in ({"resale_price": "0"}, {"floor_area_sqm": "0"},

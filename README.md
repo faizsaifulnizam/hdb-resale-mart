@@ -34,7 +34,7 @@
 | <a href="reports/figures/f2_rolling_median.png"><picture><source media="(prefers-color-scheme: dark)" srcset="reports/figures/f2_rolling_median-dark.png"><source media="(prefers-color-scheme: light)" srcset="reports/figures/f2_rolling_median.png"><img src="reports/figures/f2_rolling_median.png" alt="3-month rolling medians of town price/m²"></picture></a> | <a href="reports/figures/f3_mix_drift.png"><picture><source media="(prefers-color-scheme: dark)" srcset="reports/figures/f3_mix_drift-dark.png"><source media="(prefers-color-scheme: light)" srcset="reports/figures/f3_mix_drift.png"><img src="reports/figures/f3_mix_drift.png" alt="Town-mix drift over the sample"></picture></a> |
 | <a href="reports/figures/f4_waterfall.png"><picture><source media="(prefers-color-scheme: dark)" srcset="reports/figures/f4_waterfall-dark.png"><source media="(prefers-color-scheme: light)" srcset="reports/figures/f4_waterfall.png"><img src="reports/figures/f4_waterfall.png" alt="Rate/mix waterfall of the national move"></picture></a> | <a href="reports/figures/bi_page.png"><picture><source media="(prefers-color-scheme: dark)" srcset="reports/figures/bi_page-dark.png"><source media="(prefers-color-scheme: light)" srcset="reports/figures/bi_page.png"><img src="reports/figures/bi_page.png" alt="The Power BI page for this dataset"></picture></a> |
 
-*Rolling medians (`f2`), town-mix drift (`f3`), the rate/mix waterfall (`f4`), and the Power BI page (`bi_page`) — full size in [`reports/figures/`](reports/figures/) · half-page write-up in [`docs/decision_memo.md`](docs/decision_memo.md).*
+*Rolling medians (`f2`), town-mix drift (`f3`), the rate/mix waterfall (`f4`), and the historical Power BI export (`bi_page`) — full size in [`reports/figures/`](reports/figures/) · half-page write-up in [`docs/decision_memo.md`](docs/decision_memo.md). The editable BI source has corrected selection/frozen-benchmark captions; screenshots and release binary have not yet been re-exported.*
 
 ## The question
 
@@ -92,6 +92,7 @@ total       = Σ w₁·p₁ − Σ w₀·p₀     the mean price-level move
 - **Identity assert** on the decomposition (above); **sensitivity** — totals stay small, but the sign changes: Q3 **−0.567%**, six months **−0.016%**, twelve months **+0.987%**. The threshold preserves the sign within each window, not across windows ([`docs/sensitivity.md`](docs/sensitivity.md)).
 - **Rounding:** contribution columns in the CSV are display-rounded to 2 dp. At this build each component sum differs from its full-precision national value by <0.05 S$/m², but adding all three rounded component sums gives −40.55 rather than −40.62: a **0.07 S$/m² total discrepancy** (less than 0.1). The identity is checked before rounding.
 - **Reproduction:** the commands below regenerate the numerical outputs from the same raw snapshot; later re-pulls can move the newest months. CSV values and image bytes are separate checks: figure bytes can differ across rendering environments even when the numbers match.
+- **Safety boundaries:** shared CSV parsing rejects malformed records, duplicate headers, nonfinite numerics and stale cache receipts. Every comparison validates both national monthly calendars and finite components; unthresholded windows require full town coverage. Sparse town-months remain legal. Analysis promotes its two CSVs together; figures are read-only on CSVs and stage all eight renders plus site mirrors before promotion. Ordinary write exceptions roll back the prior generation; this is not power-loss or concurrent-reader atomicity.
 - **CI:** every main-branch push and PR runs offline synthetic-fixture pipeline and regression tests (including numerical checks and figure generation), then smoke-checks committed outputs and figures — [`.github/workflows/ci.yml`](.github/workflows/ci.yml). CI does not re-download the full HDB dataset or establish a byte-identical full-source rebuild.
 
 ### Limits
@@ -108,7 +109,7 @@ total       = Σ w₁·p₁ − Σ w₀·p₀     the mean price-level move
 
 ## Reproduce
 
-Requires [uv](https://docs.astral.sh/uv/). Run this block in Bash (Linux/macOS or Git Bash on Windows):
+Requires [uv](https://docs.astral.sh/uv/). To reproduce the historical headline, first restore the [hash-locked licensed snapshot](data/snapshots/README.md) after cloning, then run the stages below; the downloader checks this existing cache without a network call. Use `python src/download.py --force` only for a **live refresh**, which may change historical registrations. Run this block in Bash (Linux/macOS or Git Bash on Windows):
 
 ```bash
 git clone https://github.com/faizsaifulnizam/hdb-resale-mart && cd hdb-resale-mart

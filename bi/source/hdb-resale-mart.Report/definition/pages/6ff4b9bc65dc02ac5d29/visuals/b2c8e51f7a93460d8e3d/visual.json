@@ -19,7 +19,7 @@
               {
                 "textRuns": [
                   {
-                    "value": "Source: HDB resale registrations via data.gov.sg (2026-10-02 pull) · prices indicative; registrations, not listings. · National (means, Q3 vs Q3): rate −53.3 · mix −0.7 · interaction +13.3 · total −40.6 S$/m². · Town list scrolls — full table: outputs/town_4room_yoy.csv",
+                    "value": "Source: HDB via data.gov.sg · Historical 2026-10-02 snapshot (mtime proxy). · Frozen benchmark, all towns, Q3 2026 vs Q3 2025 (not filter-responsive): rate −53.3 · mix −0.7 · interaction +13.3 · total −40.6 S$/m². · Full table: outputs/town_4room_yoy.csv",
                     "textStyle": {
                       "fontFamily": "Inter",
                       "fontSize": "9pt",

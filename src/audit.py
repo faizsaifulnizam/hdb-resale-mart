@@ -16,8 +16,10 @@ def q(con, sql):
 
 
 def main():
+    from download import inspect_csv
+    inspect_csv(RAW)
     con = duckdb.connect()
-    con.execute(f"CREATE OR REPLACE VIEW raw AS SELECT * FROM read_csv_auto('{RAW}')")
+    con.read_csv(RAW).create_view('raw')
 
     print("rows:", q(con, "SELECT count(*) FROM raw")[0][0])
     cols = [r[0] for r in q(con, "DESCRIBE raw")]

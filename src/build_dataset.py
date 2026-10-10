@@ -37,9 +37,23 @@ def main():
     OUT_DIR.mkdir(parents=True, exist_ok=True)
     con = duckdb.connect()
 
-    raw_n = q(con, f"SELECT count(*) FROM read_csv_auto('{RAW}')")[0][0]
-    con.execute("CREATE OR REPLACE VIEW raw_rows AS SELECT * FROM read_csv_auto('" + RAW + "')")
+    from download import inspect_csv
+    inspect_csv(RAW, ROOT / 'data/raw/pull_manifest.json')
+    con.read_csv(RAW).create_view('raw_rows')
+    raw_n = q(con, 'SELECT count(*) FROM raw_rows')[0][0]
+    invalid = q(con, "SELECT count(*) FROM raw_rows WHERE "
+                "NOT isfinite(resale_price) OR NOT isfinite(floor_area_sqm) "
+                "OR (floor_area_sqm > 0 AND NOT isfinite(resale_price / floor_area_sqm))")[0][0]
+    if invalid:
+        print('checks failed — nonfinite input; parquet NOT written (existing file left untouched)')
+        sys.exit(1)
     con.execute(STAGING.read_text(encoding="utf-8"))
+    from analysis import validate_sales
+    try:
+        validate_sales(con)
+    except ValueError as exc:
+        print(f'checks failed — {exc}; parquet NOT written (existing file left untouched)')
+        sys.exit(1)
     out_n = q(con, "SELECT count(*) FROM sales")[0][0]
     excl_any = q(con, f"SELECT count(*) FROM raw_rows WHERE {ANY_RULE}")[0][0]
     print(f"raw rows:    {raw_n}")
@@ -66,7 +80,7 @@ def main():
 
     pq = OUT_DIR / "sales.parquet"
     tmp = OUT_DIR / "sales.parquet.tmp"
-    con.sql(f"COPY sales TO '{tmp.as_posix()}' (FORMAT PARQUET)")
+    con.sql('SELECT * FROM sales').write_parquet(tmp.as_posix())
     os.replace(tmp, pq)
     print(f"wrote: {pq.as_posix()}  ({pq.stat().st_size} bytes)")
 

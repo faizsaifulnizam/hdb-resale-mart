@@ -59,6 +59,8 @@ footer{border-top:1px solid var(--rule);margin-top:60px;padding-top:18px;color:v
 </picture>
 </div>
 
+<main>
+<h1>hdb-resale-mart — rate or mix?</h1>
 <p class="lead">4-room resale price per m² dipped in Q3 2026 vs a year earlier: <b>−1.3%</b> on the headline median (S$6,647 → <b>S$6,559/m²</b>) and <b>−0.6%</b> on the mean basis used for the decomposition — both point the same way. Town-share mix nets to ≈0: rate <b>−53.3 S$/m²</b>, mix <b>−0.7</b>, interaction <b>+13.3</b>. “Rate” still includes what sold within each town: <b>Central Area (23 sales in each quarter) contributes −16.4 of that −53.3</b>, coinciding with fewer Cantonment Road Type S1 sales (15 → 8). Restricting the split to towns with ≥25 sales in each quarter moves the rate to <b>−38.5</b>. A small dip; not a like-for-like flat-price estimate; one quarter.</p>
 
 <p><b>Intended use:</b> For a housing-market analyst, this brief puts the headline move in context before drawing local conclusions, so read the sales composition and time-window sensitivity alongside it. It is not a buy or sell recommendation, and a national or town average is not a like-for-like flat-price change.</p>
@@ -100,7 +102,7 @@ footer{border-top:1px solid var(--rule);margin-top:60px;padding-top:18px;color:v
 <source media="(prefers-color-scheme: dark)" srcset="img/bi_page-dark.png">
 <img src="img/bi_page.png" alt="The Power BI report page for this dataset">
 </picture>
-<figcaption>The Power BI report page built from the same pipeline — the .pbix ships in the <a href="https://github.com/faizsaifulnizam/hdb-resale-mart/releases">GitHub release</a>.</figcaption>
+<figcaption>Historical Power BI export from the same pipeline — the .pbix ships in the <a href="https://github.com/faizsaifulnizam/hdb-resale-mart/releases">GitHub release</a>. Editable source captions have been corrected; this PNG and the released binary are not yet refreshed.</figcaption>
 </figure>
 
 <h2>Method</h2>
@@ -113,7 +115,7 @@ footer{border-top:1px solid var(--rule);margin-top:60px;padding-top:18px;color:v
 </ol>
 
 <h2>Reproduce</h2>
-<p>Requires <a href="https://docs.astral.sh/uv/">uv</a>. Run in Bash (Linux/macOS or Git Bash on Windows):</p>
+<p>Requires <a href="https://docs.astral.sh/uv/">uv</a>. After cloning, restore the <a href="https://github.com/faizsaifulnizam/hdb-resale-mart/blob/main/data/snapshots/README.md">hash-locked licensed snapshot</a> to reproduce this historical headline. The downloader validates an existing cache; <code>--force</code> is a live refresh, not a frozen replay. Run in Bash (Linux/macOS or Git Bash on Windows):</p>
 <pre><code>git clone https://github.com/faizsaifulnizam/hdb-resale-mart &amp;&amp; cd hdb-resale-mart
 uv venv .venv --python 3.12          # or: python -m venv .venv
 if [ -f .venv/Scripts/activate ]; then
@@ -139,6 +141,7 @@ python src/figures.py        # re-renders reports/figures/</code></pre>
 <li><a href="https://github.com/faizsaifulnizam/hdb-resale-mart/releases">Release — the Power BI report file (.pbix)</a></li>
 </ul>
 
+</main>
 <footer>
 <p>Six-repo series: <a href="https://github.com/faizsaifulnizam/hdb-resale-mart">hdb-resale-mart</a> · <a href="https://github.com/faizsaifulnizam/card-book-quality">card-book-quality</a> · <a href="https://github.com/faizsaifulnizam/coe-quota-premium">coe-quota-premium</a> · <a href="https://github.com/faizsaifulnizam/retail-sales-split">retail-sales-split</a> · <a href="https://github.com/faizsaifulnizam/coe-category-break">coe-category-break</a> · <a href="https://github.com/faizsaifulnizam/hdb-lease-slope">hdb-lease-slope</a>.</p>
 <p>An independent, unofficial analysis by <a href="https://github.com/faizsaifulnizam">Muhammad Faiz Saifulnizam</a>. Data: HDB resale flat prices via <a href="https://data.gov.sg/datasets/d_8b84c4ee58e3cfc0ece0d773c8ca6abc/view">data.gov.sg</a> — Singapore Open Data Licence. Code: MIT. Not a forecast; not causal advice.</p>
