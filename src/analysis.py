@@ -36,7 +36,25 @@ def q(con, sql):
     return con.sql(sql).fetchall()
 
 
+def validate_sales(con):
+    """Every staged row must retain staging's finite, positive DOUBLE quotient.
+
+    Exact equality is intentional: staging stores the quotient verbatim, not a
+    rounded estimate. No component is silently repaired or ignored.
+    """
+    invalid = con.execute("""SELECT count(*) FROM sales WHERE
+        resale_price IS NULL OR NOT isfinite(resale_price) OR resale_price <= 0
+        OR floor_area_sqm IS NULL OR NOT isfinite(floor_area_sqm) OR floor_area_sqm <= 0
+        OR price_per_sqm IS NULL OR NOT isfinite(price_per_sqm) OR price_per_sqm <= 0
+        OR NOT isfinite(resale_price / floor_area_sqm)
+        OR price_per_sqm != resale_price / floor_area_sqm""").fetchone()[0]
+    if invalid:
+        raise ValueError(f'numeric sales contract: {invalid} nonfinite, invalid or inconsistent rows')
+
+
 def run_script(con, path):
+    if Path(path).name in ('02_dims.sql', '03_metrics.sql', '04_yoy.sql'):
+        validate_sales(con)
     # Strip comment tails per line first, then split statements on ';'
     # (safe here: no '--' inside string literals in this repo's SQL).
     text = "\n".join(l.split("--", 1)[0] for l in Path(path).read_text(encoding="utf-8").splitlines())
@@ -64,6 +82,22 @@ def decomposition(con, p0, p1, min_n=0):
     Towns must have transactions in BOTH periods (min_n filters small towns on top).
     Returns coverage counts; raises on an empty comparison instead of reporting zeros.
     """
+    for period in (p0, p1):
+        months = prev_months(period[1][:7] + '-01',
+                             (int(period[1][:4]) - int(period[0][:4])) * 12
+                             + int(period[1][5:7]) - int(period[0][5:7]) + 1)
+        observed = {str(r[0])[:10] for r in con.execute(
+            "SELECT DISTINCT sale_month FROM sales WHERE flat_type = '4 ROOM' "
+            "AND sale_date BETWEEN CAST(? AS DATE) AND CAST(? AS DATE)", period).fetchall()}
+        if set(months) != observed:
+            raise ValueError(f'incomplete national calendar: {period}; missing {sorted(set(months) - observed)}')
+        invalid = con.execute(
+            "SELECT count(*) FROM sales WHERE flat_type = '4 ROOM' "
+            "AND sale_date BETWEEN CAST(? AS DATE) AND CAST(? AS DATE) "
+            "AND (price_per_sqm IS NULL OR NOT isfinite(price_per_sqm) OR price_per_sqm <= 0)", period).fetchone()[0]
+        if invalid:
+            raise ValueError(f'nonfinite or invalid price_per_sqm: {period}')
+    validate_sales(con)
     sql = f"""
     WITH base AS (
         SELECT town,
@@ -108,9 +142,42 @@ def decomposition(con, p0, p1, min_n=0):
         raise ValueError(
             f"no towns with transactions in both periods ({p0[0]}..{p0[1]} vs {p1[0]}..{p1[1]}) — "
             "refusing to report a national comparison")
-    vals = [float(v) if v is not None else 0.0 for v in row[:5]]
+    if min_n == 0 and towns != towns_total:
+        raise ValueError('incomplete town coverage; not a national comparison')
+    import math
+    vals = [float(v) if v is not None else math.nan for v in row[:5]]
+    if not all(math.isfinite(v) for v in vals) or vals[0] <= 0:
+        raise ValueError('nonfinite decomposition or invalid baseline')
+    if not math.isfinite(100 * (vals[1] / vals[0])):
+        raise ValueError('nonfinite percentage change')
+    if abs(sum(vals[2:]) - vals[1]) > 1e-9 * max(1.0, abs(vals[1])):
+        raise ValueError('decomposition identity failed')
     return dict(zip(["level_t0", "total", "rate", "mix", "inter"], vals)) | {
         "towns": towns, "towns_total": towns_total, "towns_dropped": towns_total - towns}
+
+
+def validate_headline_export(con, d):
+    """Gate the actual unrounded export against the independent decomposition."""
+    import math
+    rows = q(con, 'SELECT * FROM town_4room_unrounded')
+    if len(rows) != d['towns'] or not rows:
+        raise ValueError('headline export: incomplete town coverage')
+    for row in rows:
+        if any(v is None or not math.isfinite(v) for v in row[1:]):
+            raise ValueError('headline export: nonfinite numeric value')
+        if any(row[i] <= 0 for i in (1, 2, 3, 4, 6, 7, 8, 9)):
+            raise ValueError('headline export: invalid count, price or share')
+    level0 = math.fsum(r[8] * r[6] for r in rows)
+    level1 = math.fsum(r[9] * r[7] for r in rows)
+    actual = {'level_t0': level0, 'total': level1 - level0,
+              'rate': math.fsum(r[10] for r in rows),
+              'mix': math.fsum(r[11] for r in rows),
+              'inter': math.fsum(r[12] for r in rows)}
+    if any(not math.isclose(actual[k], d[k], rel_tol=1e-9, abs_tol=1e-9) for k in actual):
+        raise ValueError('headline export: unrounded decomposition mismatch')
+    if any(not math.isclose(math.fsum(r[i] for r in rows), 1.0, abs_tol=1e-9)
+           for i in (8, 9)):
+        raise ValueError('headline export: invalid national shares')
 
 
 def check_cell(con, town, flat_type, month):
@@ -138,7 +205,13 @@ def main():
     os.chdir(ROOT)
     OUT.mkdir(exist_ok=True)
     con = duckdb.connect()
-    con.execute(f"CREATE OR REPLACE VIEW sales AS SELECT * FROM read_parquet('{PARQUET}')")
+    con.read_parquet(PARQUET).create_view('sales')
+    try:
+        validate_sales(con)
+    except ValueError as exc:
+        print(f'[FAIL] {exc}')
+        print('validation failed — output files NOT written (existing outputs left untouched)')
+        sys.exit(1)
     failed = False
 
     print("== dims (sql/02) ==")
@@ -214,7 +287,7 @@ def main():
             print(f"[FAIL] {label}: {exc}")
             print("validation failed — output files NOT written (existing outputs left untouched)")
             sys.exit(1)
-        pct = 100 * d["total"] / d["level_t0"]
+        pct = 100 * (d["total"] / d["level_t0"])
         srows.append({
             "variant": label,
             "towns": d["towns"],
@@ -234,7 +307,15 @@ def main():
     run_script(con, ROOT / "sql/04_yoy.sql")
     print("towns in table:", q(con, "SELECT count(*) FROM yoy_4room")[0][0])
     csv_path = OUT / "town_4room_yoy.csv"
-    print("wrote:", csv_path.as_posix(), f"({csv_path.stat().st_size} bytes)")
+    run_script(con, ROOT / 'sql/04_export.sql')
+    try:
+        validate_headline_export(con, decomposition(con, P0, P1))
+    except ValueError as exc:
+        print(f'[FAIL] {exc}')
+        print('validation failed — output files NOT written (existing outputs left untouched)')
+        sys.exit(1)
+    town_part = csv_path.with_suffix('.csv.part')
+    con.sql('SELECT * FROM town_4room_export').write_csv(town_part.as_posix(), header=True)
     print("top 6 towns (by Q3-2026 volume):")
     for r in q(con, """SELECT town, n_t0, n_t1, round(med_t0), round(med_t1),
                               round(100 * (med_t1 / med_t0 - 1), 1)
@@ -242,10 +323,17 @@ def main():
         print(f"   {r[0]:<15} n {r[1]}->{r[2]} · median {r[3]}->{r[4]} S$/m2 ({r[5]:+.1f}%)")
 
     sens_path = OUT / "sensitivity.csv"
-    with sens_path.open("w", newline="", encoding="utf-8") as f:
+    sens_part = sens_path.with_suffix('.csv.part')
+    with sens_part.open("w", newline="", encoding="utf-8") as f:
         wcsv = csv.DictWriter(f, fieldnames=list(srows[0].keys()), lineterminator="\n")
         wcsv.writeheader()
         wcsv.writerows(srows)
+    if __package__:
+        from .promotion import promote
+    else:
+        from promotion import promote
+    promote([(town_part, csv_path), (sens_part, sens_path)])
+    print("wrote:", csv_path.as_posix(), f"({csv_path.stat().st_size} bytes)")
     print("wrote:", sens_path.as_posix(), f"({sens_path.stat().st_size} bytes)")
 
     print()

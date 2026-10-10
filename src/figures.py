@@ -29,7 +29,7 @@ import matplotlib.dates as mdates  # noqa: E402
 import matplotlib.pyplot as plt  # noqa: E402
 import matplotlib.ticker as mticker  # noqa: E402
 
-from src.analysis import P0, P1, decomposition, run_script  # noqa: E402
+from src.analysis import P0, P1, decomposition, run_script, validate_headline_export  # noqa: E402
 
 PARQUET = (ROOT / "data/processed/sales.parquet").as_posix()
 FIGDIR = ROOT / "reports/figures"
@@ -57,13 +57,17 @@ MANIFEST = ROOT / "data/raw/pull_manifest.json"
 def _source_date():
     """Pull date from the raw-data manifest (falls back to the last known manual pull)."""
     try:
-        ts = json.loads(MANIFEST.read_text(encoding="utf-8")).get("retrieved_at", "")
-        return ts[:10] or None
+        receipt = json.loads(MANIFEST.read_text(encoding="utf-8"))
+        ts = receipt.get('retrieved_at', '')
+        label = ts[:10]
+        if receipt.get('retrieved_at_source') == 'file_mtime':
+            label += ' (mtime proxy)'
+        return label or None
     except Exception:
         return None
 
 
-SRC = f"Source: HDB resale registrations via data.gov.sg (© HDB), pulled {_source_date() or '2026-10-02'}"
+SRC = f"Source: HDB resale registrations via data.gov.sg (© HDB), dated {_source_date() or '2026-10-02 (date unverified)'}"
 
 
 def q(con, sql):
@@ -245,22 +249,42 @@ def fig4_waterfall(con, d):
 
 def main():
     import os
+    import shutil
+    import tempfile
+    global FIGDIR
 
     os.chdir(ROOT)
-    FIGDIR.mkdir(parents=True, exist_ok=True)
+    destination = FIGDIR
+    destination.mkdir(parents=True, exist_ok=True)
     con = duckdb.connect()
-    con.execute(f"CREATE OR REPLACE VIEW sales AS SELECT * FROM read_parquet('{PARQUET}')")
+    con.read_parquet(PARQUET).create_view('sales')
     run_script(con, ROOT / "sql/03_metrics.sql")
-    run_script(con, ROOT / "sql/04_yoy.sql")
     d = decomposition(con, P0, P1)
-    for palette in (LIGHT, DARK):
-        use_palette(palette)
-        use_series_style(dark=(palette is DARK))
-        print(f"-- rendering {'dark' if palette['suffix'] else 'light'} set --")
-        fig1_dumbbell(con)
-        fig2_rolling(con)
-        fig3_mix(con)
-        fig4_waterfall(con, d)
+    run_script(con, ROOT / "sql/04_yoy.sql")
+    run_script(con, ROOT / 'sql/04_export.sql')
+    validate_headline_export(con, d)
+    with tempfile.TemporaryDirectory(prefix='.figures-', dir=destination.parent) as temporary:
+        FIGDIR = Path(temporary)
+        try:
+            for palette in (LIGHT, DARK):
+                use_palette(palette)
+                use_series_style(dark=(palette is DARK))
+                print(f"-- rendering {'dark' if palette['suffix'] else 'light'} set --")
+                fig1_dumbbell(con)
+                fig2_rolling(con)
+                fig3_mix(con)
+                fig4_waterfall(con, d)
+            from src.promotion import promote
+            pairs = []
+            for path in sorted(FIGDIR.glob('*.png')):
+                copy = path.with_suffix('.mirror')
+                shutil.copyfile(path, copy)
+                pairs.extend([(path, destination / path.name),
+                              (copy, ROOT / 'docs/img' / path.name)])
+            promote(pairs)
+        finally:
+            FIGDIR = destination
+            plt.close('all')
     print("figures done — light + dark")
 
 

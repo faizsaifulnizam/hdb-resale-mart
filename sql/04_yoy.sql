@@ -1,5 +1,5 @@
 -- 04_yoy.sql — headline table: 4-room, Q3 2026 vs Q3 2025 (same quarter a year earlier).
--- Built by src/analysis.py. Writes: outputs/town_4room_yoy.csv.
+-- Built by src/analysis.py and src/figures.py. Read-only relation; export in sql/04_export.sql.
 --
 -- Shift-share decomposition (transaction-weighted; spec 01 §4):
 --   p = town mean price/m² in a quarter; w = town share of 4-room transactions
@@ -49,23 +49,3 @@ w AS (
     FROM piv
 )
 SELECT * FROM w;
-
--- Export (rounded for display; national totals = sums of the contribution columns).
-COPY (
-    SELECT
-        town,
-        n_t0,
-        n_t1,
-        round(med_t0, 2)  AS med_ppsm_2025q3,
-        round(med_t1, 2)  AS med_ppsm_2026q3,
-        round(100 * (med_t1 / med_t0 - 1), 2) AS med_pct_change,
-        round(mean_t0, 2) AS mean_ppsm_2025q3,
-        round(mean_t1, 2) AS mean_ppsm_2026q3,
-        round(w_t0, 4)    AS share_2025q3,
-        round(w_t1, 4)    AS share_2026q3,
-        round(w_t0 * (mean_t1 - mean_t0), 2)          AS rate_effect,
-        round((w_t1 - w_t0) * mean_t0, 2)             AS mix_effect,
-        round((w_t1 - w_t0) * (mean_t1 - mean_t0), 2) AS interaction
-    FROM yoy_4room
-    ORDER BY n_t1 DESC
-) TO 'outputs/town_4room_yoy.csv' (HEADER);

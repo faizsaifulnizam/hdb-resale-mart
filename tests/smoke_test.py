@@ -52,6 +52,9 @@ def test_town_csv() -> None:
     assert {"QUEENSTOWN", "TAMPINES"} <= towns, "expected towns missing"
     assert len(rows) >= 20, f"only {len(rows)} towns — expected the full set"
     for r in rows:
+        import math
+        for column in TOWN_REQUIRED_COLS - {'town'} | {'rate_effect', 'mix_effect', 'interaction'}:
+            assert math.isfinite(float(r[column])), f'nonfinite {column}: {r["town"]}'
         assert float(r["med_ppsm_2025q3"]) > 1000
         assert float(r["med_ppsm_2026q3"]) > 1000
         assert int(r["n_t0"]) >= 1 and int(r["n_t1"]) >= 1
@@ -65,10 +68,9 @@ def test_sensitivity_csv() -> None:
     assert len(rows) >= 4, f"only {len(rows)} variants row(s) — expected 6"
     assert rows[0]["variant"].startswith("q3"), "base variant should be first"
     for r in rows:
-        float(r["total_pct"])
-        float(r["rate"])
-        float(r["mix"])
-        float(r["interaction"])
+        import math
+        for column in ('level_t0', 'total_delta', 'total_pct', 'rate', 'mix', 'interaction'):
+            assert math.isfinite(float(r[column])), f'nonfinite {column}: {r["variant"]}'
 
 
 def test_figures_present() -> None:

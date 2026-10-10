@@ -24,7 +24,7 @@ SELECT
      + COALESCE(TRY_CAST(regexp_extract(remaining_lease, '([0-9]+) month', 1) AS INTEGER), 0) / 12.0) AS remaining_lease_years,
     resale_price,
     resale_price / NULLIF(floor_area_sqm, 0)                        AS price_per_sqm
-FROM read_csv_auto('data/raw/hdb-resale-prices-2017-onwards.csv')
+FROM raw_rows
 WHERE resale_price IS NOT NULL
   AND resale_price > 0
   AND floor_area_sqm IS NOT NULL

@@ -31,20 +31,39 @@ def get(url, ref="https://data.gov.sg/"):
         return resp.read()
 
 
-def inspect_csv(path):
+def inspect_csv(path, manifest=None):
     """Structure + content summary for the raw CSV: header, bytes, SHA-256, rows, month coverage."""
+    import csv
+    import io
     data = Path(path).read_bytes()
-    lines = data.decode("utf-8", "replace").splitlines()
-    header = lines[0].strip() if lines else ""
-    months = [l[:7] for l in lines[1:] if l[:4].isdigit() and l[4:5] == "-"]
-    return {
-        "header_ok": header == EXPECTED_HEADER,
+    reader = csv.reader(io.StringIO(data.decode('utf-8'), newline=''), strict=True)
+    header = next(reader, [])
+    if header != EXPECTED_HEADER.split(','):
+        raise ValueError('invalid or duplicate CSV schema')
+    months = []
+    for row in reader:
+        if len(row) != len(header):
+            raise ValueError('invalid CSV record width')
+        import math
+        for index in (6, 10):
+            if row[index] and not math.isfinite(float(row[index])):
+                raise ValueError('nonfinite CSV numeric value')
+        months.append(row[0])
+    if not months:
+        raise ValueError('empty CSV')
+    info = {
+        "header_ok": True,
         "bytes": len(data),
         "sha256": hashlib.sha256(data).hexdigest(),
-        "rows": len(lines) - 1 if lines else 0,
-        "month_min": min(months) if months else None,
-        "month_max": max(months) if months else None,
+        "rows": len(months),
+        "month_min": min(months),
+        "month_max": max(months),
     }
+    if manifest is not None and Path(manifest).exists():
+        saved = json.loads(Path(manifest).read_text(encoding='utf-8'))
+        if any(saved.get(key) != value for key, value in info.items()):
+            raise ValueError('cache manifest integrity mismatch')
+    return info
 
 
 def write_manifest(info, retrieved_at, source):
@@ -68,6 +87,7 @@ def main():
     args = ap.parse_args()
 
     if OUT.exists() and not args.force:
+        info = inspect_csv(OUT, MANIFEST)
         print(f"raw file already present ({OUT.stat().st_size} bytes) — use --force to refresh")
         print("path:", OUT)
         if not MANIFEST.exists():
@@ -105,10 +125,18 @@ def main():
         part.unlink(missing_ok=True)
         raise SystemExit(f"downloaded file failed structure validation (header_ok={info['header_ok']}, "
                          f"rows={info['rows']}) — kept existing file")
-    part.replace(OUT)
+    if __package__:
+        from .promotion import promote
+    else:
+        from promotion import promote
+    manifest_part = MANIFEST.with_suffix('.json.part')
+    receipt = dict(dataset_id=DATASET, dataset_url=DATASET_URL, file=OUT.name,
+                   retrieved_at=datetime.now(timezone.utc).isoformat(timespec='seconds'),
+                   retrieved_at_source='download', **info)
+    manifest_part.write_text(json.dumps(receipt, indent=2), encoding='utf-8')
+    promote([(part, OUT), (manifest_part, MANIFEST)])
     print(f"downloaded {info['bytes']} bytes · {info['rows']} rows · {info['month_min']} → {info['month_max']}")
     print("path:", OUT)
-    write_manifest(info, datetime.now(timezone.utc).isoformat(timespec="seconds"), "download")
 
 
 if __name__ == "__main__":

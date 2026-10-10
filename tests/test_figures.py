@@ -12,6 +12,14 @@ from src import figures as f
 
 
 class FigureChecks(unittest.TestCase):
+    def test_source_date_labels_mtime_proxy(self):
+        import json, tempfile
+        with tempfile.TemporaryDirectory() as directory:
+            manifest = Path(directory) / 'manifest.json'
+            manifest.write_text(json.dumps({'retrieved_at':'2026-10-02T00:00:00+00:00','retrieved_at_source':'file_mtime'}))
+            with patch.object(f, 'MANIFEST', manifest):
+                self.assertEqual(f._source_date(), '2026-10-02 (mtime proxy)')
+
     def test_waterfall_signs_and_extents(self):
         # Deliberately reverse the current source signs; hardcoded hues must fail.
         d = dict(rate=90, mix=-200, inter=-30, total=-140, level_t0=7000)

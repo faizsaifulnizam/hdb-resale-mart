@@ -52,7 +52,7 @@
             "text": {
               "expr": {
                 "Literal": {
-                  "Value": "'Median of 26 town changes, % (Q3 vs Q3)'"
+                  "Value": "'Median of selected towns’ changes, % (Q3 vs Q3)'"
                 }
               }
             }

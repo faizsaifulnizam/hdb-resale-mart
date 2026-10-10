@@ -11,6 +11,10 @@ Both theme renders ship: [`bi_page.png`](../reports/figures/bi_page.png) (light)
 
 **Rebuild:** the editable, cache-free Power BI project is committed at [`source/hdb-resale-mart.pbip`](source/hdb-resale-mart.pbip). Run the repo pipeline first. In `source/hdb-resale-mart.SemanticModel/definition/tables/town_4room_yoy.tmdl`, replace `REPLACE_WITH_ABSOLUTE_PATH_TO_OUTPUTS/town_4room_yoy.csv` with your checkout's absolute CSV path, then open the `.pbip` in Power BI Desktop and refresh. No personal machine path or cached data is shipped in the source. The release `.pbix` includes its imported snapshot; before refreshing on another machine, use Transform data → Data source settings → Change Source to select your CSV. Export a new `.pbix` using Desktop File → Save as → Power BI file (not a programmatic conversion).
 
+### Current source versus historical export
+
+The caption in the editable source now says **selected towns**; its median aggregation follows filter context. The footer is explicitly a **frozen all-town benchmark**, not a filter-responsive measure, and labels the retrieval date as an mtime proxy. Existing screenshots and the released PBIX remain historical exports with the previous captions; they have **not** been refreshed for this source repair. Desktop filter/empty/reset/refresh/export verification and a new binary export require separate authorization.
+
 **Notes**
 
 - The resale callout uses `Resales KPI`: `SUM(n_t1)` and `(SUM(n_t1) − SUM(n_t0)) / SUM(n_t0)` in the current filter context, rounded to one decimal percent. A zero/blank prior count shows `YoY unavailable`. `Resales Alt Text` reuses that measure, names both Q3 windows, gives the prior count, and distinguishes count growth from price change; there is no literal `+7%`.
